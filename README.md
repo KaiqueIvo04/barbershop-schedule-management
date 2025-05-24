@@ -1,6 +1,6 @@
-# Data Cross
+# Barbershop Schedule Management
 
-Service responsible for performing the crossing of data obtained from the informix system.
+Microservice responsible for managing schedules on the Barbershop platform.
 
 **Main features:**
 
@@ -15,7 +15,7 @@ Service responsible for performing the crossing of data obtained from the inform
 
 Application settings are defined by environment variables.. To define the settings, make a copy of the `.env.example`
 file, naming for `.env`. After that, open and edit the settings as needed. The following environments variables are
-available:
+available:F
 
 | VARIABLE | DESCRIPTION  | DEFAULT |
 |-----|-----|-----|
@@ -24,8 +24,8 @@ available:
 | `PORT_HTTPS` | Port used to listen for HTTPS requests. Do not forget to provide the private key and the SSL/TLS certificate. See the topic [generate certificates](#generate-certificates). | `3001` |
 | `SSL_KEY_PATH` | SSL/TLS certificate private key. | `./.certs/server_key.pem` |
 | `SSL_CERT_PATH` | SSL/TLS certificate. | `./.certs/server_cert.pem` |
-| `MONGODB_URI` | Database connection URI used if the application is running in development or production environment. The [URI specifications ](https://docs.mongodb.com/manual/reference/connection-string) defined by MongoDB are accepted. For example: `mongodb://user:pass@host:port/database?options`. | `mongodb://127.0.0.1:27017`<br/>`/data-cross` |
-| `MONGODB_URI_TEST` | Database connection URI used if the application is running in test environment. The [URI specifications ](https://docs.mongodb.com/manual/reference/connection-string) defined by MongoDB are accepted. For example: `mongodb://user:pass@host:port/database?options`. | `mongodb://127.0.0.1:27017`<br/>`/data-cross-test` |
+| `MONGODB_URI` | Database connection URI used if the application is running in development or production environment. The [URI specifications ](https://docs.mongodb.com/manual/reference/connection-string) defined by MongoDB are accepted. For example: `mongodb://user:pass@host:port/database?options`. | `mongodb://127.0.0.1:27017`<br/>`/barbershop` |
+| `MONGODB_URI_TEST` | Database connection URI used if the application is running in test environment. The [URI specifications ](https://docs.mongodb.com/manual/reference/connection-string) defined by MongoDB are accepted. For example: `mongodb://user:pass@host:port/database?options`. | `mongodb://127.0.0.1:27017`<br/>`/barbershop-test` |
 
 ## Generate Certificates
 
