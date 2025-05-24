@@ -1,4 +1,4 @@
-# Barbershop Schedule Management
+# Barbershop Schedule Management Service
 
 Microservice responsible for managing schedules on the Barbershop platform.
 
