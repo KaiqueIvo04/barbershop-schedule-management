@@ -20,6 +20,19 @@ import { IntegrationEventRepoModel } from '../infrastructure/database/schema/int
 import { PublishEventBusTask } from '../background/task/publish.event.bus.task'
 import { RpcServerEventBusTask } from '../background/task/rpc.server.event.bus.task'
 import { HomeController } from '../ui/controllers/home.controller'
+import { IEntityMapper } from '../infrastructure/port/entity.mapper.interface'
+import { Service } from '../application/domain/model/service'
+import { ServiceEntity } from '../infrastructure/entity/service.entity'
+import { ServiceEntityMapper } from '../infrastructure/entity/mapper/service.entity.mapper'
+import { ServiceRepoModel } from '../infrastructure/database/schema/service.schema'
+import { ScheduleRepoModel } from '../infrastructure/database/schema/schedule.schema'
+import { Schedule } from '../application/domain/model/schedule'
+import { ScheduleEntity } from '../infrastructure/entity/schedule.entity'
+import { ScheduleEntityMapper } from '../infrastructure/entity/mapper/schedule.entity.mapper'
+import { IServiceRepository } from '../application/port/service.repository.interface'
+import { ServiceRepository } from '../infrastructure/repository/service.repository'
+import { IScheduleRepository } from '../application/port/schedule.repository.interface'
+import { ScheduleRepository } from '../infrastructure/repository/schedule.repository'
 
 class IoC {
     private readonly _container: Container
@@ -61,11 +74,31 @@ class IoC {
         this._container
             .bind<IIntegrationEventRepository>(Identifier.INTEGRATION_EVENT_REPOSITORY)
             .to(IntegrationEventRepository).inSingletonScope()
+        this._container
+            .bind<IServiceRepository>(Identifier.SERVICE_REPOSITORY)
+            .to(ServiceRepository).inSingletonScope()
+        this._container
+            .bind<IScheduleRepository>(Identifier.SCHEDULE_REPOSITORY)
+            .to(ScheduleRepository).inSingletonScope()
 
         // Models Ok
-        this._container.bind(Identifier.INTEGRATION_EVENT_REPO_MODEL).toConstantValue(IntegrationEventRepoModel)
+        this._container
+            .bind(Identifier.INTEGRATION_EVENT_REPO_MODEL)
+            .toConstantValue(IntegrationEventRepoModel)
+        this._container
+            .bind(Identifier.SERVICE_REPO_MODEL)
+            .toConstantValue(ServiceRepoModel)
+        this._container
+            .bind(Identifier.SCHEDULE_REPO_MODEL)
+            .toConstantValue(ScheduleRepoModel)
 
         // Mappers Ok
+        this._container
+            .bind<IEntityMapper<Service, ServiceEntity>>(Identifier.SERVICE_ENTITY_MAPPER)
+            .to(ServiceEntityMapper).inSingletonScope()
+        this._container
+            .bind<IEntityMapper<Schedule, ScheduleEntity>>(Identifier.SCHEDULE_ENTITY_MAPPER)
+            .to(ScheduleEntityMapper).inSingletonScope()
 
         // Background Services
         this._container

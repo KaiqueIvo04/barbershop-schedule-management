@@ -1,13 +1,14 @@
 import { IJSONDeserializable } from "../utils/json.deserializable.interface"
 import { IJSONSerializable } from "../utils/json.serializable.interface"
 import { JsonUtils } from "../utils/json.utils"
+import { Entity } from "./entity"
 
-export abstract class Service implements IJSONSerializable, IJSONDeserializable<Service>{
+export class Service extends Entity implements IJSONSerializable, IJSONDeserializable<Service>{
     private _service_name?: string | undefined
     private _description?: string | undefined
     private _price?: Number | undefined
-    private _estimated_duration?: String | undefined
-    private _responsible_admin_id?: String | undefined
+    private _estimated_duration?: string | undefined
+    private _responsible_admin_id?: string | undefined
     
     public get service_name(): string | undefined {
         return this._service_name
@@ -30,17 +31,17 @@ export abstract class Service implements IJSONSerializable, IJSONDeserializable<
         this._price = value
     }
 
-    public get estimated_duration(): String | undefined {
+    public get estimated_duration(): string | undefined {
         return this._estimated_duration
     }
-    public set estimated_duration(value: String | undefined) {
+    public set estimated_duration(value: string | undefined) {
         this._estimated_duration = value
     }
 
-    public get responsible_admin_id(): String | undefined {
+    public get responsible_admin_id(): string | undefined {
         return this._responsible_admin_id
     }
-    public set responsible_admin_id(value: String | undefined) {
+    public set responsible_admin_id(value: string | undefined) {
         this._responsible_admin_id = value
     }
 

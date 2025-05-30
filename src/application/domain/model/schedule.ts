@@ -1,14 +1,15 @@
 import { IJSONDeserializable } from "../utils/json.deserializable.interface"
 import { IJSONSerializable } from "../utils/json.serializable.interface"
 import { JsonUtils } from "../utils/json.utils"
+import { Entity } from "./entity"
 
-export abstract class Schedule implements IJSONSerializable, IJSONDeserializable<Schedule> {
+export class Schedule extends Entity implements IJSONSerializable, IJSONDeserializable<Schedule> {
     private _responsible_employee_id?: string
     private _responsible_client_id?: string
     private _date_schedule?: Date
     private _status?: string
     private _responsible_admin_id?: string
-    private _services_ids?: string[]
+    private _services_ids?: Array<string>
 
     public get responsible_employee_id(): string | undefined {
         return this._responsible_employee_id
