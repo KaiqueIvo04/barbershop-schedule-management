@@ -33,6 +33,12 @@ import { IServiceRepository } from '../application/port/service.repository.inter
 import { ServiceRepository } from '../infrastructure/repository/service.repository'
 import { IScheduleRepository } from '../application/port/schedule.repository.interface'
 import { ScheduleRepository } from '../infrastructure/repository/schedule.repository'
+import { IServiceService } from '../application/port/service.service.interface'
+import { ServiceService } from '../application/services/service.service'
+import { ScheduleController } from '../ui/controllers/schedule.controller'
+import { ServiceController } from '../ui/controllers/service.controller'
+import { IScheduleService } from '../application/port/schedule.service.interface'
+import { ScheduleService } from '../application/services/schedule.service'
 
 class IoC {
     private readonly _container: Container
@@ -68,7 +74,20 @@ class IoC {
         this._container
             .bind(Identifier.HOME_CONTROLLER)
             .to(HomeController).inSingletonScope()
-        // Services
+        this._container
+            .bind(Identifier.SCHEDULE_CONTROLLER)
+            .to(ScheduleController).inSingletonScope()
+        this._container
+            .bind(Identifier.SERVICE_CONTROLLER)
+            .to(ServiceController).inSingletonScope()
+
+        // Services Ok
+        this._container
+            .bind<IServiceService>(Identifier.SERVICE_SERVICE)
+            .to(ServiceService).inSingletonScope()
+        this._container
+            .bind<IScheduleService>(Identifier.SCHEDULE_SERVICE)
+            .to(ScheduleService).inSingletonScope()
 
         // Repositories Ok
         this._container

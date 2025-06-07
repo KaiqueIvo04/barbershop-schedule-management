@@ -1,14 +1,13 @@
-import { IJSONDeserializable } from "../utils/json.deserializable.interface"
-import { IJSONSerializable } from "../utils/json.serializable.interface"
-import { JsonUtils } from "../utils/json.utils"
-import { Entity } from "./entity"
+import { IJSONDeserializable } from '../utils/json.deserializable.interface'
+import { IJSONSerializable } from '../utils/json.serializable.interface'
+import { JsonUtils } from '../utils/json.utils'
+import { Entity } from './entity'
 
 export class Schedule extends Entity implements IJSONSerializable, IJSONDeserializable<Schedule> {
     private _responsible_employee_id?: string
     private _responsible_client_id?: string
     private _date_schedule?: Date
     private _status?: string
-    private _responsible_admin_id?: string
     private _services_ids?: Array<string>
 
     public get responsible_employee_id(): string | undefined {
@@ -39,13 +38,6 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
         this._status = value
     }
 
-    public get responsible_admin_id(): string | undefined {
-        return this._responsible_admin_id
-    }
-    public set responsible_admin_id(value: string | undefined) {
-        this._responsible_admin_id = value
-    }
-
     public get services_ids(): string[] | undefined {
         return this._services_ids
     }
@@ -63,7 +55,6 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
         if (json.responsible_client_id !== undefined) this.responsible_client_id = json.responsible_client_id
         if (json.date_schedule !== undefined) this.date_schedule = json.date_schedule
         if (json.status !== undefined) this.status = json.status
-        if (json.responsible_admin_id !== undefined) this.responsible_admin_id = json.responsible_admin_id
         if (json.services_ids !== undefined) this.services_ids = json.services_ids
 
         return this
@@ -75,7 +66,6 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
             responsible_client_id: this.responsible_client_id,
             date_schedule: this.date_schedule,
             status: this.status,
-            responsible_admin_id: this.responsible_admin_id,
             services_ids: this.services_ids
         }
     }

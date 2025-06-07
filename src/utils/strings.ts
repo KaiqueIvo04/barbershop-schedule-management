@@ -12,6 +12,42 @@ export abstract class Strings {
         TITLE: 'SCHEDULE MANAGEMENT SERVICE',
     }
 
+    public static readonly ADMIN: any = {
+        REGISTER_REQUIRED: 'The responsible admin is not registered',
+        DESCRIPTION_REGISTER_REQUIRED: 'The responsible admin must be registered',
+        PARAM_ID_NOT_VALID_FORMAT: 'Parameter {admin_id} is not in valid format!',
+    }
+
+    public static readonly EMPLOYEE: any = {
+        REGISTER_REQUIRED: 'The responsible employee is not registered',
+        DESCRIPTION_REGISTER_REQUIRED: 'The responsible employee must be registered',
+        PARAM_ID_NOT_VALID_FORMAT: 'Parameter {employee_id} is not in valid format!',
+    }
+
+    public static readonly CLIENT: any = {
+        REGISTER_REQUIRED: 'The responsible client is not registered',
+        DESCRIPTION_REGISTER_REQUIRED: 'The responsible client must be registered',
+        PARAM_ID_NOT_VALID_FORMAT: 'Parameter {client_id} is not in valid format!',
+    }
+
+    public static readonly SERVICE: any = {
+        ALREADY_REGISTERED: 'Service is already registered...',
+        ALREADY_REGISTERED_DESC: 'This an existent Service: {0}.',
+        PARAM_ID_NOT_VALID_FORMAT: 'The service id is not valid!',
+        NOT_FOUND: 'Service not found!',
+        NOT_FOUND_DESCRIPTION: 'Service not found or already removed. A new operation for the same resource is required.',
+    }
+
+    public static readonly SCHEDULE: any = {
+        ALREADY_REGISTERED: 'Schedule is already registered...',
+        ALREADY_REGISTERED_DESC: 'This an existent Schedule: {0}.',
+        PARAM_ID_NOT_VALID_FORMAT: 'The schedule id is not valid!',
+        STATUS_NOT_VALID: 'The schedule status is not valid!',
+        STATUS_NOT_VALID_DESC: 'The status not allowed to be updated.',
+        NOT_FOUND: 'Schedule not found!',
+        NOT_FOUND_DESCRIPTION: 'Schedule not found or already removed. A new operation for the same resource is required.',
+    }
+
     public static readonly ERROR_MESSAGE: any = {
         REQUEST_BODY_INVALID: 'Unable to process request body!',
         REQUEST_BODY_INVALID_DESC: 'Please verify that the JSON provided in the request body has a valid format and try again.',

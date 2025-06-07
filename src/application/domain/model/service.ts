@@ -1,53 +1,53 @@
-import { IJSONDeserializable } from "../utils/json.deserializable.interface"
-import { IJSONSerializable } from "../utils/json.serializable.interface"
-import { JsonUtils } from "../utils/json.utils"
-import { Entity } from "./entity"
+import { IJSONDeserializable } from '../utils/json.deserializable.interface'
+import { IJSONSerializable } from '../utils/json.serializable.interface'
+import { JsonUtils } from '../utils/json.utils'
+import { Entity } from './entity'
 
 export class Service extends Entity implements IJSONSerializable, IJSONDeserializable<Service>{
-    private _service_name?: string | undefined
-    private _description?: string | undefined
-    private _price?: Number | undefined
-    private _estimated_duration?: string | undefined
-    private _responsible_admin_id?: string | undefined
-    
-    public get service_name(): string | undefined {
+    private _service_name?: string
+    private _description?: string
+    private _price?: number
+    private _estimated_duration?: string
+    private _responsible_admin_id?: string
+
+    get service_name(): string | undefined {
         return this._service_name
     }
-    public set service_name(value: string | undefined) {
+    set service_name(value: string | undefined) {
         this._service_name = value
     }
 
-    public get description(): string | undefined {
+    get description(): string | undefined {
         return this._description
     }
-    public set description(value: string | undefined) {
+    set description(value: string | undefined) {
         this._description = value
     }
-    
-    public get price(): Number | undefined {
+
+    get price(): number | undefined {
         return this._price
     }
-    public set price(value: Number | undefined) {
+    set price(value: number | undefined) {
         this._price = value
     }
 
-    public get estimated_duration(): string | undefined {
+    get estimated_duration(): string | undefined {
         return this._estimated_duration
     }
-    public set estimated_duration(value: string | undefined) {
+    set estimated_duration(value: string | undefined) {
         this._estimated_duration = value
     }
 
-    public get responsible_admin_id(): string | undefined {
+    get responsible_admin_id(): string | undefined {
         return this._responsible_admin_id
     }
-    public set responsible_admin_id(value: string | undefined) {
+    set responsible_admin_id(value: string | undefined) {
         this._responsible_admin_id = value
     }
 
     public fromJSON(json: any): Service {
         if (!json) return this
-        if(typeof json === 'string' && JsonUtils.isJsonString(json)) {
+        if (typeof json === 'string' && JsonUtils.isJsonString(json)) {
             json = JSON.parse(json)
         }
 

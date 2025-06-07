@@ -8,12 +8,12 @@
  * @abstract
  */
 export abstract class Default {
-    public static readonly APP_ID: string = 'account.app'
-    public static readonly APP_TITLE: string = 'Account Service for API barbershop'
-    public static readonly APP_DESCRIPTION: string = 'Service responsible for manage accounts of barbershop.'
+    public static readonly APP_ID: string = 'schedule.app'
+    public static readonly APP_TITLE: string = 'Schedule Service for API barbershop'
+    public static readonly APP_DESCRIPTION: string = 'Service responsible for manage schedules of barbershop.'
     public static readonly NODE_ENV: string = 'development' // development, test, production
-    public static readonly PORT_HTTP: number = 3000
-    public static readonly PORT_HTTPS: number = 3001
+    public static readonly PORT_HTTP: number = 4000
+    public static readonly PORT_HTTPS: number = 4001
     public static readonly SWAGGER_PATH: string = './src/ui/swagger/swagger.yaml'
     // public static readonly SWAGGER_URI: string = 'https://api.swaggerhub.com/apis/SMTC3/data-cross/v1/swagger.json'
     // public static readonly LOGO_URI: string = 'https://i.imgur.com/NSbFJ02.png'
@@ -25,10 +25,6 @@ export abstract class Default {
     // RabbitMQ
     public static readonly RABBITMQ_URI: string = 'amqp://guest:guest@127.0.0.1:5672'
 
-    // ADMIN USER DEFAULT
-    public static readonly ADMIN_EMAIL: string = 'admin@barbershop.com'
-    public static readonly ADMIN_PASSWORD: string = 'admin123'
-
     // Log
     public static readonly LOG_DIR: string = 'logs'
 
@@ -37,6 +33,6 @@ export abstract class Default {
 
     // Certificate
     // To generate self-signed certificates, see: https://devcenter.heroku.com/articles/ssl-certificate-self
-    public static readonly SSL_KEY_PATH: string = '.certs/server_key.pem'
-    public static readonly SSL_CERT_PATH: string = '.certs/server_cert.pem'
+    public static readonly SSL_KEY_PATH: string = '../.certs/server_key.pem'
+    public static readonly SSL_CERT_PATH: string = '../.certs/server_cert.pem'
 }

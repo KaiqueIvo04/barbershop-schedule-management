@@ -27,7 +27,6 @@ export class ScheduleEntityMapper implements IEntityMapper<Schedule, ScheduleEnt
         if (item.responsible_client_id !== undefined) result.responsible_client_id = item.responsible_client_id
         if (item.date_schedule !== undefined) result.date_schedule = item.date_schedule
         if (item.status !== undefined) result.status = item.status
-        if (item.responsible_admin_id !== undefined) result.responsible_admin_id = item.responsible_admin_id
         if (item.services_ids !== undefined) result.services_ids = item.services_ids
 
         return result
@@ -45,7 +44,6 @@ export class ScheduleEntityMapper implements IEntityMapper<Schedule, ScheduleEnt
         if (json.responsible_client_id !== undefined) result.responsible_client_id = json.responsible_client_id
         if (json.date_schedule !== undefined) result.date_schedule = json.date_schedule
         if (json.status !== undefined) result.status = json.status
-        if (json.responsible_admin_id !== undefined) result.responsible_admin_id = json.responsible_admin_id
         if (json.services_ids !== undefined) result.services_ids = json.services_ids
 
         return result

@@ -5,6 +5,5 @@ export class ScheduleEntity extends Entity{
     public responsible_client_id?: string
     public date_schedule?: Date
     public status?: string
-    public responsible_admin_id?: string
     public services_ids?: Array<string>
 }

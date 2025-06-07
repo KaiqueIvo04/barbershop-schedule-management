@@ -7,7 +7,6 @@ import { RepositoryException } from '../../../application/domain/exception/repos
 import { ValidationException } from '../../../application/domain/exception/validation.exception'
 import { Entity } from '../../../application/domain/model/entity'
 import { IEntityMapper } from '../../port/entity.mapper.interface'
-import { Query } from '../query/query'
 
 /**
  * Base implementation of the repository.
@@ -112,30 +111,6 @@ export abstract class BaseRepository<T extends Entity, TModel> implements IRepos
         }
         return new RepositoryException('An internal error has occurred in the database!',
             'Please try again later...')
-    }
-
-    public async checkExists(item: T): Promise<boolean> {
-        const resource = this.removeFields(item)
-        const query: Query = new Query()
-            .fromJSON({
-                filters: item?.id ?
-                    { _id: { $ne: item.id }, ...resource }
-                    : { ...resource }
-            })
-        return new Promise<boolean>((resolve, reject) => {
-            this.findOne(query)
-                .then((result: T | undefined) => resolve(!!result))
-                .catch(err => reject(this.mongoDBErrorListener(err)))
-        })
-    }
-
-    private removeFields(item: T): object {
-        const resource = item.toJSON()
-        // Remove read only fields
-        delete resource.id
-        delete resource.created_at
-        delete resource.updated_at
-        return this.recursiveRemoveFields(resource)
     }
 
     private recursiveRemoveFields(resource): object {

@@ -13,10 +13,6 @@ const ScheduleSchema = new Mongoose.Schema({
         index: true
     },
     status: String,
-    responsible_admin_id: {
-        type: Mongoose.Schema.Types.ObjectId,
-        index: true
-    },
     service_ids: [Mongoose.Schema.Types.ObjectId]
 
 }, {
