@@ -12,7 +12,7 @@ import { NotFoundException } from '../../application/domain/exception/not.found.
 import { Strings } from '../../utils/strings'
 
 
-@controller('/services')
+@controller('/v1/services')
 export class ServiceController {
     constructor(
         @inject(Identifier.SERVICE_SERVICE) private readonly _serviceService: IServiceService,

@@ -13,8 +13,8 @@ const ScheduleSchema = new Mongoose.Schema({
         index: true
     },
     status: String,
-    service_ids: [Mongoose.Schema.Types.ObjectId]
-
+    date_schedule: Date,
+    services_ids: [Mongoose.Schema.Types.ObjectId]
 }, {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
     toJSON: {

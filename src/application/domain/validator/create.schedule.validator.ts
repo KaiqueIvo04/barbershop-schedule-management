@@ -17,6 +17,18 @@ export class CreateScheduleValidator {
         if (schedule.date_schedule === undefined) fields.push('date_schedule')
         else StringValidator.validate(schedule.date_schedule, 'date_schedule', false)
 
+        if (schedule.services_ids === undefined) fields.push('services_ids')
+        else {
+            if (!Array.isArray(schedule.services_ids)) throw new ValidationException(
+                Strings.SCHEDULE.SERVICES_IDS_NOT_VALID,
+                Strings.SCHEDULE.SERVICES_IDS_NOT_VALID_DESC
+            )
+
+            schedule.services_ids.forEach((service_id: string) => {
+                ObjectIdValidator.validate(service_id, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
+            })
+        }
+
         if (fields.length > 0) throw new ValidationException('REQUIRED_FIELDS', fields.join(', '))
     }
 }

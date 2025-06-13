@@ -42,6 +42,7 @@ export class ScheduleService implements IScheduleService {
 
             // 5. Create schedule
             const newSchedule: Schedule | undefined = await this._scheduleRepository.create(schedule)
+            // ESTÁ CRIANDO COM A HORA EM 3 HORAS A MAIS DO HORÁRIO ATUAL
 
             return Promise.resolve(newSchedule)
         } catch (err) {

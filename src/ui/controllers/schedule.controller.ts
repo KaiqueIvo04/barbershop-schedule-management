@@ -3,7 +3,7 @@ import { Identifier } from '../../di/identifiers'
 import { inject } from 'inversify'
 import { Schedule } from '../../application/domain/model/schedule'
 import { ApiExceptionManager } from '../../ui/exception/api.exception.manager'
-import { httpDelete, httpGet, httpPatch, httpPost, request, response } from 'inversify-express-utils'
+import { controller, httpDelete, httpGet, httpPatch, httpPost, request, response } from 'inversify-express-utils'
 import { Request, Response } from 'express'
 import HttpStatus from 'http-status-codes'
 import { Strings } from '../../utils/strings'
@@ -11,6 +11,7 @@ import { NotFoundException } from '../../application/domain/exception/not.found.
 import { IQuery } from '../../application/port/query.interface'
 import { Query } from '../../infrastructure/repository/query/query'
 
+@controller('/v1/schedules')
 export class ScheduleController {
     constructor(
         @inject(Identifier.SCHEDULE_SERVICE) private readonly _scheduleService: IScheduleService,

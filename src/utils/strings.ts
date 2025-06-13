@@ -44,6 +44,8 @@ export abstract class Strings {
         PARAM_ID_NOT_VALID_FORMAT: 'The schedule id is not valid!',
         STATUS_NOT_VALID: 'The schedule status is not valid!',
         STATUS_NOT_VALID_DESC: 'The status not allowed to be updated.',
+        SERVICES_IDS_NOT_VALID: 'The services ids are not valid!',
+        SERVICES_IDS_NOT_VALID_DESC: 'The services ids must be an array of strings.',
         NOT_FOUND: 'Schedule not found!',
         NOT_FOUND_DESCRIPTION: 'Schedule not found or already removed. A new operation for the same resource is required.',
     }
@@ -70,6 +72,7 @@ export abstract class Strings {
             INVALID_STRING: '{0} must be a string!',
             EMPTY_STRING: '{0} must have at least one character!',
             INVALID_NUMERIC_STRING: '{0} must only have numeric digits!',
+            INVALID_NUMBER: '{0} must be a number!',
             INVALID_ALFABETIC_STRING: '{0} must only have alphabetic characters!',
             INVALID_ADDRESS_NUMBER: 'number must contains only letters, numbers and /.',
             INVALID_TEXT_FIELD: '{0} must contain a minimum of {1} and a maximum of {2} characters.',

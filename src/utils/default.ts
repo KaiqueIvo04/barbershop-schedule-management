@@ -19,8 +19,8 @@ export abstract class Default {
     // public static readonly LOGO_URI: string = 'https://i.imgur.com/NSbFJ02.png'
 
     // MongoDB
-    public static readonly MONGODB_URI: string = 'mongodb://localhost:27017/barbershop-account'
-    public static readonly MONGODB_URI_TEST: string = 'mongodb://localhost:27017/barbershop-account-test'
+    public static readonly MONGODB_URI: string = 'mongodb://localhost:27017/barbershop-schedule-management'
+    public static readonly MONGODB_URI_TEST: string = 'mongodb://localhost:27017/barbershop-schedule-management-test'
 
     // RabbitMQ
     public static readonly RABBITMQ_URI: string = 'amqp://guest:guest@127.0.0.1:5672'

@@ -51,6 +51,7 @@ export class Service extends Entity implements IJSONSerializable, IJSONDeseriali
             json = JSON.parse(json)
         }
 
+        if (json.id) super.id = json.id
         if (json.service_name !== undefined) this.service_name = json.service_name
         if (json.description !== undefined) this.description = json.description
         if (json.price !== undefined) this.price = json.price
@@ -62,6 +63,9 @@ export class Service extends Entity implements IJSONSerializable, IJSONDeseriali
 
     public toJSON() {
         const resultJson: any = {
+            id: this.id,
+            created_at: this.created_at,
+            updated_at: this.updated_at,
             service_name: this.service_name,
             description: this.description,
             price: this.price,

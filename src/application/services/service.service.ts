@@ -30,10 +30,7 @@ export class ServiceService implements IServiceService {
 
             // 3. Check if the service already exists
             const serviceExists: Service | undefined = await this._serviceRepository.checkExists(service)
-            if (serviceExists) throw new ConflictException(
-                Strings.SERVICE.ALREADY_REGISTERED,
-                Strings.SERVICE.ALREADY_REGISTERED_DESC.replace('{0}', serviceExists.id)
-            )
+            if (serviceExists) throw new ConflictException(Strings.SERVICE.ALREADY_REGISTERED)
 
             // 4. Create new Service
             const newService: Service | undefined = await this._serviceRepository.create(service)

@@ -51,6 +51,7 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
             json = JSON.parse(json)
         }
 
+        if (json.id) super.id = json.id
         if (json.responsible_employee_id !== undefined) this.responsible_employee_id = json.responsible_employee_id
         if (json.responsible_client_id !== undefined) this.responsible_client_id = json.responsible_client_id
         if (json.date_schedule !== undefined) this.date_schedule = json.date_schedule
@@ -62,6 +63,9 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
 
     public toJSON(): any {
         return {
+            id: this.id,
+            created_at: this.created_at,
+            updated_at: this.updated_at,
             responsible_employee_id: this.responsible_employee_id,
             responsible_client_id: this.responsible_client_id,
             date_schedule: this.date_schedule,
