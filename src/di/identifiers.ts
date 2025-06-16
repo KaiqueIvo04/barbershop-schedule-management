@@ -10,10 +10,12 @@ export abstract class Identifier {
     public static readonly HOME_CONTROLLER: any = Symbol.for('HomeController')
     public static readonly SCHEDULE_CONTROLLER: any = Symbol.for('ScheduleController')
     public static readonly SERVICE_CONTROLLER: any = Symbol.for('ServiceController')
+    public static readonly WORK_SCHEDULE_CONTROLLER: any = Symbol.for('WorkScheduleController')
 
     // Services
     public static readonly SERVICE_SERVICE: any = Symbol.for('ServiceService')
     public static readonly SCHEDULE_SERVICE: any = Symbol.for('ScheduleService')
+    public static readonly WORK_SCHEDULE_SERVICE: any = Symbol.for('WorkScheduleService')
 
     // Repositories
     public static readonly INTEGRATION_EVENT_REPOSITORY: any = Symbol.for('IntegrationEventRepository')

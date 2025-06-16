@@ -61,8 +61,8 @@ export class ServiceController {
             const result: boolean = await this._serviceService.remove(req.params.id)
 
             if (!result) throw new NotFoundException(
-                Strings.SERVICE.NOT_FOUND, Strings.
-                SERVICE.NOT_FOUND_DESCRIPTION
+                Strings.SERVICE.NOT_FOUND,
+                Strings.SERVICE.NOT_FOUND_DESCRIPTION
             )
 
             return res.status(HttpStatus.NO_CONTENT).send()

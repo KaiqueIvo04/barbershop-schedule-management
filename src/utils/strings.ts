@@ -50,6 +50,11 @@ export abstract class Strings {
         NOT_FOUND_DESCRIPTION: 'Schedule not found or already removed. A new operation for the same resource is required.',
     }
 
+    public static readonly WORK_SCHEDULE: any = {
+        NOT_FOUND: 'Work schedule not found!',
+        NOT_FOUND_DESCRIPTION: 'Work schedule not found or already removed. A new operation for the same resource is required.',
+    }
+
     public static readonly ERROR_MESSAGE: any = {
         REQUEST_BODY_INVALID: 'Unable to process request body!',
         REQUEST_BODY_INVALID_DESC: 'Please verify that the JSON provided in the request body has a valid format and try again.',

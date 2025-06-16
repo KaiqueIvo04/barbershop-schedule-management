@@ -4,7 +4,7 @@ import { JsonUtils } from '../utils/json.utils'
 import { Entity } from './entity'
 import { WorkDays } from './workDays'
 
-export class WeeklySchedule extends Entity implements IJSONSerializable, IJSONDeserializable<WeeklySchedule> {
+export class WorkSchedule extends Entity implements IJSONSerializable, IJSONDeserializable<WorkSchedule> {
     private _employee_id?: string
     private _week_start_day?: Date
     private _schedule?: WorkDays
@@ -31,7 +31,7 @@ export class WeeklySchedule extends Entity implements IJSONSerializable, IJSONDe
         this._schedule = value
     }
 
-    public fromJSON(json: any): WeeklySchedule {
+    public fromJSON(json: any): WorkSchedule {
         if (!json) return this
         if (typeof json === 'string' && JsonUtils.isJsonString(json)) {
             json = JSON.parse(json)
