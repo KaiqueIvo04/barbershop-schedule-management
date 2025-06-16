@@ -73,26 +73,26 @@ export class WorkDays extends Entity {
             json = JSON.parse(json)
         }
 
-        if (json.monday) this.monday = json.monday
-        if (json.tuesday) this.tuesday = json.tuesday
-        if (json.wednesday) this.wednesday = json.wednesday
-        if (json.thursday) this.thursday = json.thursday
-        if (json.friday) this.friday = json.friday
-        if (json.saturday) this.saturday = json.saturday
-        if (json.sunday) this.sunday = json.sunday
+        if (json.monday) this.monday = new Day().fromJSON(json.monday)
+        if (json.tuesday) this.tuesday = new Day().fromJSON(json.tuesday)
+        if (json.wednesday) this.wednesday = new Day().fromJSON(json.wednesday)
+        if (json.thursday) this.thursday = new Day().fromJSON(json.thursday)
+        if (json.friday) this.friday = new Day().fromJSON(json.friday)
+        if (json.saturday) this.saturday = new Day().fromJSON(json.saturday)
+        if (json.sunday) this.sunday = new Day().fromJSON(json.sunday)
 
         return this
     }
 
     public toJSON(): any {
         const resultJson: any = {
-            monday: this.monday,
-            tuesday: this.tuesday,
-            wednesday: this.wednesday,
-            thursday: this.thursday,
-            friday: this.friday,
-            saturday: this.saturday,
-            sunday: this.sunday
+            monday: this.monday && Object.keys(this.monday).length ? this.monday.toJSON() : undefined,
+            tuesday: this.tuesday && Object.keys(this.tuesday).length ? this.tuesday.toJSON() : undefined,
+            wednesday: this.wednesday && Object.keys(this.wednesday).length ? this.wednesday.toJSON() : undefined,
+            thursday: this.thursday && Object.keys(this.thursday).length ? this.thursday.toJSON() : undefined,
+            friday: this.friday && Object.keys(this.friday).length ? this.friday.toJSON() : undefined,
+            saturday: this.saturday && Object.keys(this.saturday).length ? this.saturday.toJSON() : undefined,
+            sunday: this.sunday && Object.keys(this.sunday).length ? this.sunday.toJSON() : undefined
         }
 
         return resultJson

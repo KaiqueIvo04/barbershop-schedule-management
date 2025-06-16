@@ -21,15 +21,18 @@ export abstract class Identifier {
     public static readonly INTEGRATION_EVENT_REPOSITORY: any = Symbol.for('IntegrationEventRepository')
     public static readonly SERVICE_REPOSITORY: any = Symbol.for('ServiceRepository')
     public static readonly SCHEDULE_REPOSITORY: any = Symbol.for('ScheduleRepository')
+    public static readonly WORK_SCHEDULE_REPOSITORY: any = Symbol.for('WorkScheduleRepository')
 
     // Models
     public static readonly INTEGRATION_EVENT_REPO_MODEL: any = Symbol.for('IntegrationEventRepoModel')
     public static readonly SERVICE_REPO_MODEL: any = Symbol.for('ServiceRepoModel')
     public static readonly SCHEDULE_REPO_MODEL: any = Symbol.for('ScheduleRepoModel')
+    public static readonly WORK_SCHEDULE_REPO_MODEL: any = Symbol.for('WorkScheduleRepoModel')
 
     // Mappers
     public static readonly SERVICE_ENTITY_MAPPER: any = Symbol.for('ServiceEntityMapper')
     public static readonly SCHEDULE_ENTITY_MAPPER: any = Symbol.for('ScheduleEntityMapper')
+    public static readonly WORK_SCHEDULE_ENTITY_MAPPER: any = Symbol.for('WorkScheduleEntityMapper')
 
     // Background Services
     public static readonly MONGODB_CONNECTION_FACTORY: any = Symbol.for('ConnectionFactoryMongodb')

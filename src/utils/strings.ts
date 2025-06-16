@@ -51,8 +51,12 @@ export abstract class Strings {
     }
 
     public static readonly WORK_SCHEDULE: any = {
+        ALREADY_REGISTERED: 'Work schedule is already registered...',
+        ALREADY_REGISTERED_DESC: 'This an existent Work Schedule: {0}.',
         NOT_FOUND: 'Work schedule not found!',
         NOT_FOUND_DESCRIPTION: 'Work schedule not found or already removed. A new operation for the same resource is required.',
+        WORK_DAYS_NOT_VALID: 'The work days are not valid!',
+        WORK_DAYS_NOT_VALID_DESC: 'The work days must be an object with the following structure: {monday: {is_working: boolean, start_time: string, end_time: string}}, {tuesday...',
     }
 
     public static readonly ERROR_MESSAGE: any = {
