@@ -7,9 +7,6 @@ export class CreateDayValidator {
         const fields: Array<string> = []
 
         // Required fields
-        if (day.is_working === undefined) {
-            console.log('day', day)
-        }
         if (day.is_working === undefined) fields.push('is_working')
         else BooleanValidator.validate(day.is_working, 'is_working')
 

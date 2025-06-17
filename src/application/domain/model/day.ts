@@ -36,7 +36,7 @@ export class Day extends Entity {
             json = JSON.parse(json)
         }
 
-        if (json.is_working) this.is_working = json.is_working
+        if (json.is_working !== undefined) this.is_working = json.is_working
         if (json.start_time) this.start_time = json.start_time
         if (json.end_time) this.end_time = json.end_time
 

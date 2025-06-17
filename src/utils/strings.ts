@@ -57,6 +57,8 @@ export abstract class Strings {
         NOT_FOUND_DESCRIPTION: 'Work schedule not found or already removed. A new operation for the same resource is required.',
         WORK_DAYS_NOT_VALID: 'The work days are not valid!',
         WORK_DAYS_NOT_VALID_DESC: 'The work days must be an object with the following structure: {monday: {is_working: boolean, start_time: string, end_time: string}}, {tuesday...',
+        WEEK_START_DAY_NOT_VALID: 'The week start day is not valid!',
+        WEEK_START_DAY_NOT_VALID_DESC: 'The week start day must be a Monday!',
     }
 
     public static readonly ERROR_MESSAGE: any = {

@@ -17,7 +17,16 @@ export class CreateWorkScheduleValidator {
         else ObjectIdValidator.validate(workSchedule.responsible_admin_id, 'The responsible_admin_id is not valid!')
 
         if (workSchedule.week_start_day === undefined) fields.push('week_start_day')
-        else StringValidator.validate(workSchedule.week_start_day, 'week_start_day', false)
+        else {
+            StringValidator.validate(workSchedule.week_start_day, 'week_start_day', false)
+            const date = new Date(workSchedule.week_start_day)
+            if (date.getDay() + 1 !== 1) { // 1 = Monday
+                throw new ValidationException(
+                    Strings.WORK_SCHEDULE.WEEK_START_DAY_NOT_VALID,
+                    Strings.WORK_SCHEDULE.WEEK_START_DAY_NOT_VALID_DESC
+                )
+            }
+        }
 
         if (workSchedule.work_days === undefined) fields.push('work_days')
         else {
@@ -25,7 +34,6 @@ export class CreateWorkScheduleValidator {
                 Strings.WORK_SCHEDULE.WORK_DAYS_NOT_VALID,
                 Strings.WORK_SCHEDULE.WORK_DAYS_NOT_VALID_DESC
             )
-            console.log('workSchedule.work_days', workSchedule.work_days)
             CreateWorkDaysValidator.validate(workSchedule.work_days)
         }
 
