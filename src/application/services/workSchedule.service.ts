@@ -1,0 +1,124 @@
+import { inject, injectable } from 'inversify'
+import { IWorkScheduleRepository } from '../port/workSchedule.repository.interface'
+import { Identifier } from '../../di/identifiers'
+import { IEventBus } from '../../infrastructure/port/event.bus.interface'
+import { WorkSchedule } from '../domain/model/workSchedule'
+import { ConflictException } from '../domain/exception/conflict.exception'
+import { Strings } from '../../utils/strings'
+import { ValidationException } from '../domain/exception/validation.exception'
+import { EventBusException } from '../domain/exception/eventbus.exception'
+import { CreateWorkScheduleValidator } from '../domain/validator/create.workSchedule.validator'
+import { UpdateWorkScheduleValidator } from '../domain/validator/update.workSchedule.validator'
+import { ObjectIdValidator } from '../domain/validator/object.id.validator'
+import { IQuery } from '../port/query.interface'
+
+@injectable()
+export class WorkScheduleService {
+    constructor(
+        @inject(Identifier.WORK_SCHEDULE_REPOSITORY) readonly workScheduleRepository: IWorkScheduleRepository,
+        @inject(Identifier.RABBITMQ_EVENT_BUS) private readonly _eventBus: IEventBus
+    ) {}
+
+    public async add(workSchedule: WorkSchedule): Promise<WorkSchedule | undefined> {
+        try {
+            // 1. Validate fields of workSchedule
+            CreateWorkScheduleValidator.validate(workSchedule)
+
+            // 2. Check if the responsible admin exists
+            await this.checkExistResponsibleAdmin(workSchedule.responsible_admin_id!)
+
+            // 3. Check possible duplicated workSchedule
+            const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
+            if (workScheduleExists) throw new ConflictException(Strings.WORK_SCHEDULE.ALREADY_REGISTERED)
+
+            // 4. Create new WorkSchedule
+            const newWorkSchedule: WorkSchedule | undefined = await this.workScheduleRepository.create(workSchedule)
+
+            return Promise.resolve(newWorkSchedule)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async getAll(query: IQuery): Promise<Array<WorkSchedule>> {
+        try {
+            const workSchedules: Array<WorkSchedule> = await this.workScheduleRepository.find(query)
+            return Promise.resolve(workSchedules)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async getById(id: string, query: IQuery): Promise<WorkSchedule | undefined> {
+        try {
+            ObjectIdValidator.validate(id, Strings.WORK_SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
+            const workSchedule: WorkSchedule | undefined = await this.workScheduleRepository.findOne(query)
+            return Promise.resolve(workSchedule)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async update(workSchedule: WorkSchedule): Promise<WorkSchedule | undefined> {
+        try {
+            // 1. Validate fields of workSchedule
+            UpdateWorkScheduleValidator.validate(workSchedule)
+
+            // 2. Remove atributte unupdatable
+            delete workSchedule.responsible_admin_id
+
+            // 3. Check if the work schedule exists
+            const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
+            if (!workScheduleExists) throw new ConflictException(
+                Strings.WORK_SCHEDULE.ALREADY_REGISTERED,
+                Strings.WORK_SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', workSchedule.id)
+            )
+
+            // 4. Update WorkSchedule
+            const updatedWorkSchedule: WorkSchedule | undefined = await this.workScheduleRepository.update(workSchedule)
+
+            return Promise.resolve(updatedWorkSchedule)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async remove(id: string): Promise<boolean> {
+        try {
+            ObjectIdValidator.validate(id, Strings.WORK_SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
+
+            const result: boolean = await this.workScheduleRepository.delete(id)
+            return Promise.resolve(result)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async count(query: any): Promise<number> {
+        try {
+            const total: number = await this.workScheduleRepository.count(query)
+            return Promise.resolve(total)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    private async checkExistResponsibleAdmin(adminId: string): Promise<any> {
+        try {
+            const result: any = await this._eventBus.executeResource('account.rpc', 'admin.findone', adminId)
+
+            if (!result) {
+                throw new ValidationException(
+                    Strings.ADMIN.REGISTER_REQUIRED,
+                    Strings.ADMIN.DESCRIPTION_REGISTER_REQUIRED
+                )
+            }
+
+            return Promise.resolve(true)
+        } catch (err: any) {
+            if (!(err instanceof ValidationException))
+                return Promise.reject(new EventBusException(Strings.ERROR_MESSAGE.EVENT_BUS.DEFAULT_MESSAGE, err.message))
+            return Promise.reject(err)
+        }
+    }
+}

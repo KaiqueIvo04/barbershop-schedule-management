@@ -39,6 +39,15 @@ import { ScheduleController } from '../ui/controllers/schedule.controller'
 import { ServiceController } from '../ui/controllers/service.controller'
 import { IScheduleService } from '../application/port/schedule.service.interface'
 import { ScheduleService } from '../application/services/schedule.service'
+import { WorkScheduleController } from '../ui/controllers/workSchedule.controller'
+import { IWorkScheduleService } from '../application/port/wokSchedule.service.interface'
+import { WorkScheduleService } from '../application/services/workSchedule.service'
+import { IWorkScheduleRepository } from '../application/port/workSchedule.repository.interface'
+import { WorkScheduleRepository } from '../infrastructure/repository/workSchedule.repository'
+import { WorkScheduleRepoModel } from '../infrastructure/database/schema/workSchedule.schema'
+import { WorkScheduleEntity } from '../infrastructure/entity/workSchedule.entity'
+import { WorkSchedule } from '../application/domain/model/workSchedule'
+import { WorkScheduleEntityMapper } from '../infrastructure/entity/mapper/workSchedule.entity.mapper'
 
 class IoC {
     private readonly _container: Container
@@ -80,6 +89,9 @@ class IoC {
         this._container
             .bind(Identifier.SERVICE_CONTROLLER)
             .to(ServiceController).inSingletonScope()
+        this._container
+            .bind(Identifier.WORK_SCHEDULE_CONTROLLER)
+            .to(WorkScheduleController).inSingletonScope()
 
         // Services Ok
         this._container
@@ -88,6 +100,9 @@ class IoC {
         this._container
             .bind<IScheduleService>(Identifier.SCHEDULE_SERVICE)
             .to(ScheduleService).inSingletonScope()
+        this._container
+            .bind<IWorkScheduleService>(Identifier.WORK_SCHEDULE_SERVICE)
+            .to(WorkScheduleService).inSingletonScope()
 
         // Repositories Ok
         this._container
@@ -99,6 +114,9 @@ class IoC {
         this._container
             .bind<IScheduleRepository>(Identifier.SCHEDULE_REPOSITORY)
             .to(ScheduleRepository).inSingletonScope()
+        this._container
+            .bind<IWorkScheduleRepository>(Identifier.WORK_SCHEDULE_REPOSITORY)
+            .to(WorkScheduleRepository).inSingletonScope()
 
         // Models Ok
         this._container
@@ -110,6 +128,9 @@ class IoC {
         this._container
             .bind(Identifier.SCHEDULE_REPO_MODEL)
             .toConstantValue(ScheduleRepoModel)
+        this._container
+            .bind(Identifier.WORK_SCHEDULE_REPO_MODEL)
+            .toConstantValue(WorkScheduleRepoModel)
 
         // Mappers Ok
         this._container
@@ -118,6 +139,9 @@ class IoC {
         this._container
             .bind<IEntityMapper<Schedule, ScheduleEntity>>(Identifier.SCHEDULE_ENTITY_MAPPER)
             .to(ScheduleEntityMapper).inSingletonScope()
+        this._container
+            .bind<IEntityMapper<WorkSchedule, WorkScheduleEntity>>(Identifier.WORK_SCHEDULE_ENTITY_MAPPER)
+            .to(WorkScheduleEntityMapper).inSingletonScope()
 
         // Background Services
         this._container

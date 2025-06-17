@@ -50,6 +50,17 @@ export abstract class Strings {
         NOT_FOUND_DESCRIPTION: 'Schedule not found or already removed. A new operation for the same resource is required.',
     }
 
+    public static readonly WORK_SCHEDULE: any = {
+        ALREADY_REGISTERED: 'Work schedule is already registered...',
+        ALREADY_REGISTERED_DESC: 'This an existent Work Schedule: {0}.',
+        NOT_FOUND: 'Work schedule not found!',
+        NOT_FOUND_DESCRIPTION: 'Work schedule not found or already removed. A new operation for the same resource is required.',
+        WORK_DAYS_NOT_VALID: 'The work days are not valid!',
+        WORK_DAYS_NOT_VALID_DESC: 'The work days must be an object with the following structure: {monday: {is_working: boolean, start_time: string, end_time: string}}, {tuesday...',
+        WEEK_START_DAY_NOT_VALID: 'The week start day is not valid!',
+        WEEK_START_DAY_NOT_VALID_DESC: 'The week start day must be a Monday!',
+    }
+
     public static readonly ERROR_MESSAGE: any = {
         REQUEST_BODY_INVALID: 'Unable to process request body!',
         REQUEST_BODY_INVALID_DESC: 'Please verify that the JSON provided in the request body has a valid format and try again.',
