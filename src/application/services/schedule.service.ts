@@ -3,22 +3,30 @@ import { Identifier } from '../../di/identifiers'
 import { inject, injectable } from 'inversify'
 import { CreateScheduleValidator } from '../domain/validator/create.schedule.validator'
 import { Schedule } from '../domain/model/schedule'
-import { ConflictException } from '../../application/domain/exception/conflict.exception'
+import { ConflictException } from '../domain/exception/conflict.exception'
 import { Strings } from '../../utils/strings'
 import { IEventBus } from '../../infrastructure/port/event.bus.interface'
 import { ValidationException } from '../domain/exception/validation.exception'
-import { IQuery } from '../../application/port/query.interface'
+import { IQuery } from '../port/query.interface'
 import { ObjectIdValidator } from '../domain/validator/object.id.validator'
 import { ScheduleStatus } from '../domain/utils/schedule.status'
-import { UpdateScheduleValidator } from '../../application/domain/validator/update.schedule.validator'
+import { UpdateScheduleValidator } from '../domain/validator/update.schedule.validator'
 import { IScheduleService } from '../port/schedule.service.interface'
-import { EventBusException } from '../../application/domain/exception/eventbus.exception'
+import { EventBusException } from '../domain/exception/eventbus.exception'
+import { IWorkScheduleRepository } from '../port/workSchedule.repository.interface'
+import { WorkSchedule } from '../domain/model/workSchedule'
+import { IServiceRepository } from '../port/service.repository.interface'
+import { Query } from '../../infrastructure/repository/query/query'
+import { Service } from '../domain/model/service'
+import { Day } from '../domain/model/day'
 
 @injectable()
 export class ScheduleService implements IScheduleService {
 
     constructor(
         @inject(Identifier.SCHEDULE_REPOSITORY) private readonly _scheduleRepository: IScheduleRepository,
+        @inject(Identifier.WORK_SCHEDULE_REPOSITORY) private readonly _workScheduleRepository: IWorkScheduleRepository,
+        @inject(Identifier.SERVICE_REPOSITORY) private readonly _serviceRepository: IServiceRepository,
         @inject(Identifier.RABBITMQ_EVENT_BUS) private readonly _eventBus: IEventBus
     ) { }
 
@@ -64,6 +72,71 @@ export class ScheduleService implements IScheduleService {
             ObjectIdValidator.validate(id, Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
             const schedule: Schedule | undefined = await this._scheduleRepository.findOne(query)
             return Promise.resolve(schedule)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
+    public async getAvaliableSlots(employee_id: string, query: IQuery): Promise<Array<string>> {
+        try {
+            const day: Date = new Date(query.filters.day)
+            // 1. Check exists employee and Find work schedule of employee
+            await this.checkExistResponsibleEmployee(employee_id)
+            const workSchedule: WorkSchedule | undefined = await this._workScheduleRepository.findByEmployeeAndDay(
+                employee_id,
+                day
+            )
+            if (!workSchedule) return []
+
+            // 2. Find duration of target service
+            const serviceQuery: IQuery = new Query()
+            serviceQuery.addFilter({
+                _id: query.filters.service_id
+            })
+            const service: Service | undefined = await this._serviceRepository.findOne(serviceQuery)
+            if (!service) return []
+
+            // 3. Find schedules existants of day
+            const existingSchedules: Array<Schedule> | undefined = await this._scheduleRepository.findByEmployeeAndDate(
+                employee_id, day
+            )
+
+            // 4. Verify if employee works in day
+            const dayOfWeek: string = this.getDayOfWeekName(day)
+            if (!workSchedule.work_days![dayOfWeek].is_working) {
+                return []
+            }
+
+            // 5. Generate slots
+            const daySchedule: Day = workSchedule.work_days![dayOfWeek]
+            const slots: Array<string> = this.generateTimeSlots(
+                daySchedule.start_time!,
+                daySchedule.end_time!,
+                service.estimated_duration!,
+            )
+
+            // 6. Collect schedules durations and times
+            const occupiedPeriods: Array<{ start: number, end: number }> = []
+
+            if (existingSchedules && existingSchedules.length > 0) {
+                for (const schedule of existingSchedules) {
+                    const scheduleDuration = await this.getScheduleDuration(schedule)
+                    const startTime = this.dateToMinutes(schedule.date_schedule!)
+                    const endTime = startTime + scheduleDuration
+
+                    occupiedPeriods.push({
+                        start: startTime,
+                        end: endTime
+                    })
+                }
+            }
+
+            // 7. Filter available slots
+            const availableSlots = this.filterSlots(slots, occupiedPeriods, service.estimated_duration!)
+
+
+            return availableSlots
+
         } catch (err) {
             return Promise.reject(err)
         }
@@ -134,5 +207,97 @@ export class ScheduleService implements IScheduleService {
                 return Promise.reject(new EventBusException(Strings.ERROR_MESSAGE.EVENT_BUS.DEFAULT_MESSAGE, err.message))
             return Promise.reject(err)
         }
+    }
+
+    private async checkExistResponsibleEmployee(employeeId: string): Promise<any> {
+        try {
+            const result: any = await this._eventBus.executeResource('account.rpc', 'admin.findone', employeeId)
+
+            if (!result) {
+                throw new ValidationException(
+                    Strings.EMPLOYEE.REGISTER_REQUIRED,
+                    Strings.EMPLOYEE.DESCRIPTION_REGISTER_REQUIRED
+                )
+            }
+
+            return Promise.resolve(true)
+        } catch (err: any) {
+            if (!(err instanceof ValidationException))
+                return Promise.reject(new EventBusException(Strings.ERROR_MESSAGE.EVENT_BUS.DEFAULT_MESSAGE, err.message))
+            return Promise.reject(err)
+        }
+    }
+
+    // AUX FUNCTIONS
+    private getDayOfWeekName(date: Date): string {
+        const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+        return weekDays[date.getDay()]
+    }
+
+    private generateTimeSlots(
+        startTime: string,
+        endTime: string,
+        serviceDuration: number,
+    ): Array<string> {
+        const slots: Array<string> = []
+        const start = this.timeToMinutes(startTime)
+        const end = this.timeToMinutes(endTime)
+
+        for (let time = start; time + serviceDuration <= end; time += 15) {
+            slots.push(this.minutesToTime(time))
+        }
+
+        return slots
+    }
+
+    private filterSlots(
+        slots: Array<string>,
+        occupiedPeriods: Array<{ start: number, end: number }>,
+        serviceDuration: number
+    ): Array<string> {
+        return slots.filter(slot => {
+            const slotStart = this.timeToMinutes(slot)
+            const slotEnd = slotStart + serviceDuration
+
+            // Verifica se o slot não conflita com nenhum período ocupado
+            return !occupiedPeriods.some(occupied => {
+                // Verifica se há sobreposição entre o slot e o período ocupado
+                return (slotStart < occupied.end && slotEnd > occupied.start)
+            })
+        })
+    }
+
+    private async getScheduleDuration(schedule: Schedule): Promise<number> {
+        let duration: number = 0
+        const queryIds: IQuery = new Query()
+        queryIds.addFilter({
+            _id: { $in: schedule.services_ids }
+        })
+
+        const services: Array<Service> | undefined = await this._serviceRepository.find(queryIds)
+
+        services.forEach(service => {
+            duration += service.estimated_duration!
+        })
+        return duration
+    }
+
+    // Convert date for minutes
+    private dateToMinutes(date: Date): number {
+        const hours = date.getUTCHours()
+        const minutes = date.getUTCMinutes()
+        return hours * 60 + minutes
+    }
+    // Convert "19:00" to minutes
+    private timeToMinutes(time: string): number {
+        const [hours, minutes] = time.split(':').map(Number)
+        return hours * 60 + minutes
+    }
+
+    // Convert minutes for "19:00"
+    private minutesToTime(minutes: number): string {
+        const hours = Math.floor(minutes / 60)
+        const mins = minutes % 60
+        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
     }
 }

@@ -7,7 +7,7 @@ const ServiceSchema = new Mongoose.Schema({
     service_name: String,
     description: String,
     price: Number,
-    estimated_duration: String,
+    estimated_duration: Number,
     responsible_admin_id: {
         type: Mongoose.Schema.Types.ObjectId,
         index: true

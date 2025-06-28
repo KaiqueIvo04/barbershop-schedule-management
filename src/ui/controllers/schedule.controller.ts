@@ -10,6 +10,7 @@ import { Strings } from '../../utils/strings'
 import { NotFoundException } from '../../application/domain/exception/not.found.exception'
 import { IQuery } from '../../application/port/query.interface'
 import { Query } from '../../infrastructure/repository/query/query'
+import { ValidationException } from '../../application/domain/exception/validation.exception'
 
 @controller('/v1/schedules')
 export class ScheduleController {
@@ -37,7 +38,7 @@ export class ScheduleController {
     public async updateSchedule(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
             const updateSchedule: Schedule = new Schedule().fromJSON(req.body)
-            updateSchedule.id = req.params.id
+            updateSchedule.id = req.params.schedule_id
 
             const result: Schedule | undefined = await this._scheduleService.update(updateSchedule)
 
@@ -58,7 +59,7 @@ export class ScheduleController {
     @httpDelete('/:schedule_id')
     public async deleteSchedule(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
-            const result: boolean = await this._scheduleService.remove(req.params.id)
+            const result: boolean = await this._scheduleService.remove(req.params.schedule_id)
 
             if (!result) throw new NotFoundException(
                 Strings.SCHEDULE.NOT_FOUND,
@@ -95,8 +96,8 @@ export class ScheduleController {
     public async getScheduleById(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
             const query: IQuery = new Query().fromJSON(req.query)
-            query.addFilter({ _id: req.params.id })
-            const schedule: Schedule | undefined = await this._scheduleService.getById(req.params.id, query)
+            query.addFilter({ _id: req.params.schedule_id })
+            const schedule: Schedule | undefined = await this._scheduleService.getById(req.params.schedule_id, query)
 
             if (!schedule) throw new NotFoundException(
                 Strings.SCHEDULE.NOT_FOUND,
@@ -108,6 +109,26 @@ export class ScheduleController {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
                .send(handlerError.toJSON())
+        }
+    }
+
+    @httpGet('/avaliableslots/:employee_id')
+    public async getAvaliableSlots(@request() req: Request, @response() res: Response): Promise<Response> {
+        try {
+            const query: IQuery = new Query().fromJSON(req.query)
+
+            if ((!query.filters.day) || (!query.filters.service_id)) throw new ValidationException(
+                Strings.SCHEDULE.QUERY_AVALIABLE_SLOTS_NOT_VALID,
+                Strings.SCHEDULE.QUERY_AVALIABLE_SLOTS_NOT_VALID_DESC
+            )
+
+            const result: Array<string> = await this._scheduleService.getAvaliableSlots(req.params.employee_id, query)
+
+            return res.status(HttpStatus.OK).send(result)
+        } catch (err: any) {
+            const handlerError = ApiExceptionManager.build(err)
+            return res.status(handlerError.code)
+                .send(handlerError.toJSON())
         }
     }
 

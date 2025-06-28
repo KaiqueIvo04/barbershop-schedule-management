@@ -44,6 +44,8 @@ export abstract class Strings {
         PARAM_ID_NOT_VALID_FORMAT: 'The schedule id is not valid!',
         STATUS_NOT_VALID: 'The schedule status is not valid!',
         STATUS_NOT_VALID_DESC: 'The status not allowed to be updated.',
+        QUERY_AVALIABLE_SLOTS_NOT_VALID: 'Query of avaliable slots is not valid!',
+        QUERY_AVALIABLE_SLOTS_NOT_VALID_DESC: 'The query needs service_id and day (Date).',
         SERVICES_IDS_NOT_VALID: 'The services ids are not valid!',
         SERVICES_IDS_NOT_VALID_DESC: 'The services ids must be an array of strings.',
         NOT_FOUND: 'Schedule not found!',

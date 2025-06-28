@@ -7,7 +7,7 @@ export class Service extends Entity implements IJSONSerializable, IJSONDeseriali
     private _service_name?: string
     private _description?: string
     private _price?: number
-    private _estimated_duration?: string
+    private _estimated_duration?: number
     private _responsible_admin_id?: string
 
     get service_name(): string | undefined {
@@ -31,10 +31,10 @@ export class Service extends Entity implements IJSONSerializable, IJSONDeseriali
         this._price = value
     }
 
-    get estimated_duration(): string | undefined {
+    get estimated_duration(): number | undefined {
         return this._estimated_duration
     }
-    set estimated_duration(value: string | undefined) {
+    set estimated_duration(value: number | undefined) {
         this._estimated_duration = value
     }
 

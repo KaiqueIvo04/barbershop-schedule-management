@@ -26,7 +26,7 @@ export class WorkScheduleRepository extends BaseRepository<WorkSchedule, WorkSch
         const set: any = { $set: itemUp }
 
         return new Promise<WorkSchedule | undefined>((resolve, reject) => {
-            this.Model.findOneAndUpdate({ _id: itemUp.id}, set, { new: true })
+            this.Model.findOneAndUpdate({ _id: itemUp.id }, set, { new: true })
                 .exec()
                 .then((result: WorkScheduleEntity) => {
                     if (!result) return resolve(undefined)
@@ -46,5 +46,25 @@ export class WorkScheduleRepository extends BaseRepository<WorkSchedule, WorkSch
         })
 
         return this.findOne(query)
+    }
+
+    public async findByEmployeeAndDay(employee_id: string, day: Date): Promise<WorkSchedule | undefined> {
+        const query: IQuery = new Query()
+        query.addFilter({
+            employee_id
+        })
+
+        const allWorkSchedules: Array<WorkSchedule> = await this.find(query)
+
+        if (!allWorkSchedules || allWorkSchedules.length === 0) {
+            return undefined
+        }
+
+        // Filtra usando o método containsDate da classe
+        const result: Array<WorkSchedule> = allWorkSchedules.filter(schedule =>
+            schedule.containsDate(day)
+        )
+
+        return result[0]
     }
 }

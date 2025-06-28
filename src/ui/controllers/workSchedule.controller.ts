@@ -14,7 +14,7 @@ import { IQuery } from '../../application/port/query.interface'
 @controller('/v1/workschedules')
 export class WorkScheduleController {
     constructor(
-        @inject(Identifier.WORK_SCHEDULE_SERVICE) private readonly workScheduleService: IWorkScheduleService
+        @inject(Identifier.WORK_SCHEDULE_SERVICE) private readonly _workScheduleService: IWorkScheduleService
     ) {}
 
     @httpPost('/')
@@ -22,7 +22,7 @@ export class WorkScheduleController {
         try {
             const newWorkSchedule: WorkSchedule = new WorkSchedule().fromJSON(req.body)
             delete newWorkSchedule.id
-            const result: WorkSchedule | undefined = await this.workScheduleService.add(newWorkSchedule)
+            const result: WorkSchedule | undefined = await this._workScheduleService.add(newWorkSchedule)
 
             return res.status(HttpStatus.CREATED)
                 .send(result)
@@ -33,10 +33,13 @@ export class WorkScheduleController {
         }
     }
 
-    @httpPatch('/:id')
+    @httpPatch('/:workschedule_id')
     public async updateWorkSchedule(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
-            const result: boolean = await this.workScheduleService.remove(req.params.id)
+            const updateWorkSchedule: WorkSchedule = new WorkSchedule().fromJSON(req.body)
+            updateWorkSchedule.id = req.params.workschedule_id
+
+            const result: WorkSchedule | undefined = await this._workScheduleService.update(updateWorkSchedule)
 
             if (!result) throw new NotFoundException(
                 Strings.WORK_SCHEDULE.NOT_FOUND,
@@ -55,7 +58,7 @@ export class WorkScheduleController {
     @httpDelete('/:id')
     public async deleteWorkSchedule(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
-            const result: boolean = await this.workScheduleService.remove(req.params.id)
+            const result: boolean = await this._workScheduleService.remove(req.params.id)
 
             if (!result) throw new NotFoundException(
                 Strings.WORK_SCHEDULE.NOT_FOUND,
@@ -75,9 +78,9 @@ export class WorkScheduleController {
     public async getAllWorkSchedules(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
             const query: IQuery = new Query().fromJSON(req.query)
-            const workSchedules: Array<WorkSchedule> = await this.workScheduleService.getAll(query)
+            const workSchedules: Array<WorkSchedule> = await this._workScheduleService.getAll(query)
 
-            const count: number = await this.workScheduleService.count(query)
+            const count: number = await this._workScheduleService.count(query)
             res.setHeader('X-Total-Count', count)
 
             return res.status(HttpStatus.OK).send(this.toJSONView(workSchedules))
@@ -93,7 +96,7 @@ export class WorkScheduleController {
         try {
             const query: IQuery = new Query().fromJSON(req.query)
             query.addFilter({ _id: req.params.id })
-            const workSchedule: WorkSchedule | undefined = await this.workScheduleService.getById(req.params.id, query)
+            const workSchedule: WorkSchedule | undefined = await this._workScheduleService.getById(req.params.id, query)
 
             if (!workSchedule) throw new NotFoundException(
                 Strings.WORK_SCHEDULE.NOT_FOUND,

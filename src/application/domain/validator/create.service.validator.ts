@@ -1,7 +1,6 @@
 import { ValidationException } from '../exception/validation.exception'
 import { Service } from '../model/service'
 import { NumberValidator } from './number.validator'
-import { NumericStringValidator } from './numeric.string.validator'
 import { ObjectIdValidator } from './object.id.validator'
 import { StringValidator } from './string.validator'
 
@@ -18,7 +17,7 @@ export class CreateServiceValidator {
         else NumberValidator.validate(service.price, 'price', false)
 
         if (service.estimated_duration === undefined) fields.push('estimated_duration')
-        else NumericStringValidator.validate(service.estimated_duration, 'estimated_duration', false)
+        else NumberValidator.validate(service.estimated_duration, 'estimated_duration', false)
 
         if (service.responsible_admin_id === undefined) fields.push('responsible_admin_id')
         else ObjectIdValidator.validate(service.responsible_admin_id, 'The responsible_admin_id is not valid!')

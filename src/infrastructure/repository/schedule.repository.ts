@@ -10,7 +10,7 @@ import { IQuery } from '../../application/port/query.interface'
 import { Query } from './query/query'
 
 @injectable()
-export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity> implements IScheduleRepository{
+export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity> implements IScheduleRepository {
     constructor(
         @inject(Identifier.SCHEDULE_REPO_MODEL) readonly _scheduleRepoModel: any,
         @inject(Identifier.SCHEDULE_ENTITY_MAPPER) readonly _scheduleEntityMapper: IEntityMapper<Schedule, ScheduleEntity>,
@@ -25,7 +25,7 @@ export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity>
         const set: any = { $set: itemUp }
 
         return new Promise<Schedule | undefined>((resolve, reject) => {
-            this.Model.findOneAndUpdate({ _id: itemUp.id}, set, { new: true })
+            this.Model.findOneAndUpdate({ _id: itemUp.id }, set, { new: true })
                 .exec()
                 .then((result: ScheduleEntity) => {
                     if (!result) return resolve(undefined)
@@ -47,5 +47,22 @@ export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity>
         })
 
         return this.findOne(query)
+    }
+
+    public findByEmployeeAndDate(employee_id: string, date: Date): Promise<Array<Schedule> | undefined> {
+        const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+        const endOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1))
+
+        const query: IQuery = new Query().fromJSON({
+            filters: {
+                responsible_employee_id: employee_id,
+                date_schedule: {
+                    $gte: startOfDay,
+                    $lt: endOfDay
+                }
+            }
+        })
+
+        return this.find(query)
     }
 }

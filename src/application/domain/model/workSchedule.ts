@@ -38,6 +38,21 @@ export class WorkSchedule extends Entity implements IJSONSerializable, IJSONDese
         this._work_days = value
     }
 
+    public containsDate(targetDate: Date): boolean {
+        if (!this.week_start_day) return false
+
+        const weekStart = new Date(this.week_start_day)
+        const weekEnd = new Date(weekStart)
+        weekEnd.setDate(weekStart.getDate() + 6)
+
+        // Normaliza datas
+        const target: Date = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
+        const start: Date = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate())
+        const end: Date = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate())
+
+        return target >= start && target <= end
+    }
+
     public fromJSON(json: any): WorkSchedule {
         if (!json) return this
         if (typeof json === 'string' && JsonUtils.isJsonString(json)) {

@@ -24,8 +24,8 @@ export class WorkScheduleService {
             // 1. Validate fields of workSchedule
             CreateWorkScheduleValidator.validate(workSchedule)
 
-            // 2. Check if the responsible admin exists
-            await this.checkExistResponsibleAdmin(workSchedule.responsible_admin_id!)
+            // 2. Check if the responsible users exists
+            await this.checkExistResponsibleUsers(workSchedule)
 
             // 3. Check possible duplicated workSchedule
             const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
@@ -67,7 +67,9 @@ export class WorkScheduleService {
             // 2. Remove atributte unupdatable
             delete workSchedule.responsible_admin_id
 
-            // 3. Check if the work schedule exists
+            // 3. Check if the work schedule exists and employee exists
+            if (workSchedule.employee_id) await this.checkExistResponsibleEmployee(workSchedule.employee_id!)
+
             const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
             if (!workScheduleExists) throw new ConflictException(
                 Strings.WORK_SCHEDULE.ALREADY_REGISTERED,
@@ -103,14 +105,45 @@ export class WorkScheduleService {
         }
     }
 
-    private async checkExistResponsibleAdmin(adminId: string): Promise<any> {
+    private async checkExistResponsibleUsers(workSchedule: WorkSchedule): Promise<any> {
         try {
-            const result: any = await this._eventBus.executeResource('account.rpc', 'admin.findone', adminId)
+            const resultEmployee: any = await this._eventBus.executeResource(
+                'account.rpc', 'employee.findone', workSchedule.employee_id
+            )
+            const resultClient: any = await this._eventBus.executeResource(
+                'account.rpc', 'admin.findone', workSchedule.responsible_admin_id
+            )
 
-            if (!result) {
+            if (!resultEmployee) {
+                throw new ValidationException(
+                    Strings.EMPLOYEE.REGISTER_REQUIRED,
+                    Strings.EMPLOYEE.DESCRIPTION_REGISTER_REQUIRED
+                )
+            }
+
+            if (!resultClient) {
                 throw new ValidationException(
                     Strings.ADMIN.REGISTER_REQUIRED,
                     Strings.ADMIN.DESCRIPTION_REGISTER_REQUIRED
+                )
+            }
+
+            return Promise.resolve(true)
+        } catch (err: any) {
+            if (!(err instanceof ValidationException))
+                return Promise.reject(new EventBusException(Strings.ERROR_MESSAGE.EVENT_BUS.DEFAULT_MESSAGE, err.message))
+            return Promise.reject(err)
+        }
+    }
+
+    private async checkExistResponsibleEmployee(employeeId: string): Promise<any> {
+        try {
+            const result: any = await this._eventBus.executeResource('account.rpc', 'admin.findone', employeeId)
+
+            if (!result) {
+                throw new ValidationException(
+                    Strings.EMPLOYEE.REGISTER_REQUIRED,
+                    Strings.EMPLOYEE.DESCRIPTION_REGISTER_REQUIRED
                 )
             }
 
