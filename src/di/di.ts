@@ -48,6 +48,7 @@ import { WorkScheduleRepoModel } from '../infrastructure/database/schema/workSch
 import { WorkScheduleEntity } from '../infrastructure/entity/workSchedule.entity'
 import { WorkSchedule } from '../application/domain/model/workSchedule'
 import { WorkScheduleEntityMapper } from '../infrastructure/entity/mapper/workSchedule.entity.mapper'
+import { ScheduleStatusController } from '../ui/controllers/schedule.status.controller'
 
 class IoC {
     private readonly _container: Container
@@ -86,6 +87,9 @@ class IoC {
         this._container
             .bind(Identifier.SCHEDULE_CONTROLLER)
             .to(ScheduleController).inSingletonScope()
+        this._container
+            .bind(Identifier.SCHEDULE_STATUS_CONTROLLER)
+            .to(ScheduleStatusController).inSingletonScope()
         this._container
             .bind(Identifier.SERVICE_CONTROLLER)
             .to(ServiceController).inSingletonScope()

@@ -15,7 +15,7 @@ export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity>
         @inject(Identifier.SCHEDULE_REPO_MODEL) readonly _scheduleRepoModel: any,
         @inject(Identifier.SCHEDULE_ENTITY_MAPPER) readonly _scheduleEntityMapper: IEntityMapper<Schedule, ScheduleEntity>,
         @inject(Identifier.LOGGER) readonly _logger: ILogger
-    ){
+    ) {
         super(_scheduleRepoModel, _scheduleEntityMapper, _logger)
     }
 
@@ -35,6 +35,20 @@ export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity>
         })
     }
 
+    public updateStatusById(schedule_id: string, newStatus: string): Promise<Schedule | undefined> {
+        const statusUp = { status: newStatus }
+
+        return new Promise<Schedule | undefined>((resolve, reject) => {
+            this.Model.findOneAndUpdate({ _id: schedule_id }, statusUp, { new: true })
+                .exec()
+                .then((result: ScheduleEntity) => {
+                    if (!result) return resolve(undefined)
+                    return resolve(this._scheduleEntityMapper.transform(result))
+                })
+                .catch(err => reject(this.mongoDBErrorListener(err)))
+        })
+    }
+
     // Check if a schedule already exists
     public checkExists(schedule: Schedule): Promise<Schedule | undefined> {
         const query: IQuery = new Query().fromJSON({
@@ -47,6 +61,10 @@ export class ScheduleRepository extends BaseRepository<Schedule, ScheduleEntity>
         })
 
         return this.findOne(query)
+    }
+
+    public findById(schedule_id: string): Promise<Schedule | undefined> {
+        return super.findOne(new Query().fromJSON({ filters: { _id: schedule_id } }))
     }
 
     public findByEmployeeAndDate(employee_id: string, date: Date): Promise<Array<Schedule> | undefined> {

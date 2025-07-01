@@ -19,6 +19,8 @@ import { IServiceRepository } from '../port/service.repository.interface'
 import { Query } from '../../infrastructure/repository/query/query'
 import { Service } from '../domain/model/service'
 import { Day } from '../domain/model/day'
+import { StringValidator } from '../domain/validator/string.validator'
+import { ScheduleStatusValidator } from '../domain/validator/schedule.status.validator'
 
 @injectable()
 export class ScheduleService implements IScheduleService {
@@ -79,8 +81,16 @@ export class ScheduleService implements IScheduleService {
 
     public async getAvaliableSlots(employee_id: string, query: IQuery): Promise<Array<string>> {
         try {
+            // 1. Validate params
+            ObjectIdValidator.validate(employee_id, Strings.EMPLOYEE.PARAM_ID_NOT_VALID_FORMAT)
+            ObjectIdValidator.validate(query.filters.service_id, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
+
+            if (typeof query.filters.day !== 'string') throw new ValidationException(
+                Strings.ERROR_MESSAGE.REQUIRED_FIELDS,
+                Strings.SCHEDULE.DAY_NOT_VALID_DESC
+            )
             const day: Date = new Date(query.filters.day)
-            // 1. Check exists employee and Find work schedule of employee
+            // 2. Check exists employee and Find work schedule of employee
             await this.checkExistResponsibleEmployee(employee_id)
             const workSchedule: WorkSchedule | undefined = await this._workScheduleRepository.findByEmployeeAndDay(
                 employee_id,
@@ -88,7 +98,7 @@ export class ScheduleService implements IScheduleService {
             )
             if (!workSchedule) return []
 
-            // 2. Find duration of target service
+            // 3. Find duration of target service
             const serviceQuery: IQuery = new Query()
             serviceQuery.addFilter({
                 _id: query.filters.service_id
@@ -96,18 +106,18 @@ export class ScheduleService implements IScheduleService {
             const service: Service | undefined = await this._serviceRepository.findOne(serviceQuery)
             if (!service) return []
 
-            // 3. Find schedules existants of day
+            // 4. Find schedules existants of day
             const existingSchedules: Array<Schedule> | undefined = await this._scheduleRepository.findByEmployeeAndDate(
                 employee_id, day
             )
 
-            // 4. Verify if employee works in day
+            // 5. Verify if employee works in day
             const dayOfWeek: string = this.getDayOfWeekName(day)
             if (!workSchedule.work_days![dayOfWeek].is_working) {
                 return []
             }
 
-            // 5. Generate slots
+            // 6. Generate slots
             const daySchedule: Day = workSchedule.work_days![dayOfWeek]
             const slots: Array<string> = this.generateTimeSlots(
                 daySchedule.start_time!,
@@ -115,7 +125,7 @@ export class ScheduleService implements IScheduleService {
                 service.estimated_duration!,
             )
 
-            // 6. Collect schedules durations and times
+            // 7. Collect schedules durations and times
             const occupiedPeriods: Array<{ start: number, end: number }> = []
 
             if (existingSchedules && existingSchedules.length > 0) {
@@ -131,7 +141,7 @@ export class ScheduleService implements IScheduleService {
                 }
             }
 
-            // 7. Filter available slots
+            // 8. Filter available slots
             const availableSlots = this.filterSlots(slots, occupiedPeriods, service.estimated_duration!)
 
 
@@ -158,6 +168,41 @@ export class ScheduleService implements IScheduleService {
         }
     }
 
+    public async updateStatusById(schedule_id: string, status: string): Promise<Schedule | undefined> {
+        try {
+            // 1. Validate Ids and parameters
+            ObjectIdValidator.validate(schedule_id, Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
+            if (!status) throw new ValidationException(
+                Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS,
+                Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('0', 'status')
+            )
+            StringValidator.validate(status, 'status', false, false)
+            ScheduleStatusValidator.validate(status)
+
+            // 2. Check if Schdule exists
+            const schedule: Schedule | undefined = await this._scheduleRepository.findById(schedule_id)
+            if (!schedule) return Promise.resolve(undefined)
+
+            // 3. Check if Schedule is completed
+            if (schedule.status === ScheduleStatus.COMPLETED) {
+                throw new ValidationException(
+                    Strings.SCHEDULE.STATUS_NOT_VALID,
+                    Strings.SCHEDULE.ALREADY_COMPLETED_DESC
+                )
+            }
+
+            // 7. Updates status of the Schedule and returns the register.
+            const scheduleUpdated: Schedule | undefined = await this._scheduleRepository.updateStatusById(
+                schedule_id,
+                status
+            )
+
+            return Promise.resolve(scheduleUpdated)
+        } catch (err) {
+            return Promise.reject(err)
+        }
+    }
+
     public async remove(id: string): Promise<boolean> {
         try {
             ObjectIdValidator.validate(id, Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
@@ -178,6 +223,7 @@ export class ScheduleService implements IScheduleService {
         }
     }
 
+    // AUX FUNCTIONS
     private async checkExistResponsibleUsers(schedule: Schedule): Promise<any> {
         try {
             const resultEmployee: any = await this._eventBus.executeResource(
@@ -228,7 +274,6 @@ export class ScheduleService implements IScheduleService {
         }
     }
 
-    // AUX FUNCTIONS
     private getDayOfWeekName(date: Date): string {
         const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
         return weekDays[date.getDay()]

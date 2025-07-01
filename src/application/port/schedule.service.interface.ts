@@ -4,4 +4,5 @@ import { IService } from './service.interface'
 
 export interface IScheduleService extends IService<Schedule> {
     getAvaliableSlots(employee_id: string, query: IQuery): Promise<Array<string>>
+    updateStatusById(schedule_id: string, status: string): Promise<Schedule | undefined>
 }
