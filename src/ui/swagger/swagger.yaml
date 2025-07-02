@@ -2,16 +2,1027 @@ openapi: 3.0.0
 info:
   version: v1
   title: Schedule Management
-  description: Documentation for the schedule management - Barbershop
+  description: Documentation for the schedules management - Barbershop
 
 servers:
   - description: Localhost
-    url: https://localhost:3001/v1
+    url: https://localhost:4001
 
-tags: []
+tags:
+  - name: Schedules
+    description: "Endpoints for managing schedules"
+    
+  - name: Schedules.status
 
-paths: {}
+  - name: Services
+    description: "Endpoints for managing services"
+
+  - name: WorkSchedules
+    description: "Endpoints for managing work schedules"
+
+paths:
+  /v1/schedules:
+    post:
+      security:
+        - JWTAuth: ["sc:c"]
+      tags:
+        - Schedules
+      summary: Create a new schedule
+      description: This endpoint creates a new schedule for a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleRequest"
+      responses:
+        "201":
+          description: Schedule created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+    get:
+      security:
+        - JWTAuth: ["sc:ra"]
+      tags:
+        - Schedules
+      summary: Retrieve all schedules
+      description: This endpoint retrieves a list of schedules with pagination and filtering options
+      parameters:
+        - $ref: "#/components/parameters/filterParam"
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+      responses:
+        "200":
+          description: Schedules retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Schedule"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+    patch:
+      security:
+        - JWTAuth: ["sc:u"]
+      tags:
+        - Schedules
+      summary: Update multiple schedules
+      description: This endpoint updates multiple schedules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schedules:
+                  type: array
+                  items:
+                    allOf:
+                      - type: object
+                        properties:
+                          id:
+                            type: string
+                            description: "Schedule ID to update"
+                      - $ref: "#/components/schemas/ScheduleRequest"
+      responses:
+        "200":
+          description: Schedules updated successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/schedules/{id}:
+    get:
+      security:
+        - JWTAuth: ["sc:r"]
+      tags:
+        - Schedules
+      summary: Retrieve a schedule by id
+      description: This endpoint retrieves a specific schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Schedule to retrieve.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Schedule retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    patch:
+      security:
+        - JWTAuth: ["sc:u"]
+      tags:
+        - Schedules
+      summary: Update a schedule by id
+      description: This endpoint updates a specific schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Schedule to update.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleRequest"
+      responses:
+        "200":
+          description: Schedule updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      security:
+        - JWTAuth: ["sc:d"]
+      tags:
+        - Schedules
+      summary: Delete a schedule by id
+      description: This endpoint deletes a specific schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Schedule to delete.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/204"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/schedules/{schedule_id}/status:
+    put:
+      security:
+        - JWTAuth: ["sc:u"]
+      tags:
+        - Schedules.status
+      summary: Update a schedule status by id
+      description: This endpoint updates the status of a specific schedule
+      parameters:
+        - name: schedule_id
+          in: path
+          required: true
+          description: Id of Schedule to update status.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: "New status of the schedule"
+                  enum: ["pending", "in_progress", "confirmed", "cancelled", "completed"]
+                  example: "confirmed"
+      responses:
+        "200":
+          description: Schedule status updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/services:
+    post:
+      security:
+        - JWTAuth: ["sv:c"]
+      tags:
+        - Services
+      summary: Create a new service
+      description: This endpoint creates a new service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceRequest"
+      responses:
+        "201":
+          description: Service created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+    get:
+      security:
+        - JWTAuth: ["sv:ra"]
+      tags:
+        - Services
+      summary: Retrieve all services
+      description: This endpoint retrieves a list of services with pagination and filtering options
+      parameters:
+        - $ref: "#/components/parameters/filterParam"
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+      responses:
+        "200":
+          description: Services retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Service"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/services/{id}:
+    get:
+      security:
+        - JWTAuth: ["sv:r"]
+      tags:
+        - Services
+      summary: Retrieve a service by id
+      description: This endpoint retrieves a specific service by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Service to retrieve.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Service retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    patch:
+      security:
+        - JWTAuth: ["sv:u"]
+      tags:
+        - Services
+      summary: Update a service by id
+      description: This endpoint updates a specific service by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Service to update.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceRequest"
+      responses:
+        "200":
+          description: Service updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      security:
+        - JWTAuth: ["sv:d"]
+      tags:
+        - Services
+      summary: Delete a service by id
+      description: This endpoint deletes a specific service by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Service to delete.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/204"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/workschedules:
+    post:
+      security:
+        - JWTAuth: ["ws:c"]
+      tags:
+        - WorkSchedules
+      summary: Create a new work schedule
+      description: This endpoint creates a new work schedule for an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkScheduleRequest"
+      responses:
+        "201":
+          description: Work schedule created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkSchedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+    get:
+      security:
+        - JWTAuth: ["ws:ra"]
+      tags:
+        - WorkSchedules
+      summary: Retrieve all work schedules
+      description: This endpoint retrieves a list of work schedules with pagination and filtering options
+      parameters:
+        - $ref: "#/components/parameters/filterParam"
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+      responses:
+        "200":
+          description: Work schedules retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkSchedule"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /v1/workschedules/{id}:
+    get:
+      security:
+        - JWTAuth: ["ws:r"]
+      tags:
+        - WorkSchedules
+      summary: Retrieve a work schedule by id
+      description: This endpoint retrieves a specific work schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Work Schedule to retrieve.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Work schedule retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkSchedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    patch:
+      security:
+        - JWTAuth: ["ws:u"]
+      tags:
+        - WorkSchedules
+      summary: Update a work schedule by id
+      description: This endpoint updates a specific work schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Work Schedule to update.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkScheduleRequest"
+      responses:
+        "200":
+          description: Work schedule updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkSchedule"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      security:
+        - JWTAuth: ["ws:d"]
+      tags:
+        - WorkSchedules
+      summary: Delete a work schedule by id
+      description: This endpoint deletes a specific work schedule by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id of Work Schedule to delete.
+          example: "5a62be07de34500146d9c540"
+          schema:
+            type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/204"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
 
 components:
-  schemas: {}
-  responses: {}
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: "Unique identifier for the schedule"
+          example: "685f0bb40913590485a8e51a"
+        responsible_employee_id:
+          type: string
+          description: "Unique identifier for the responsible employee that will be performing the service"
+          example: "685f0bb40913590485a8e51a"
+        responsible_client_id:
+          type: string
+          description: "Unique identifier for the responsible client that will be receiving the service"
+          example: "685f0bb40913590485a8e51a"
+        status:
+          type: string
+          description: "Status of the schedule"
+          enum: ["pending", "in_progress", "confirmed", "cancelled", "completed"]
+          example: "pending"
+        date_schedule:
+          type: string
+          format: date-time
+          description: "Date and time of the schedule"
+          example: "2025-01-01T00:00:00.000Z"
+        services_ids:
+          type: array
+          items:
+            type: string
+          description: "Unique identifiers for the services that will be performed"
+          example: ["685f0bb40913590485a8e51a", "685f0bb40913590485a8e51b"]
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of schedule creation"
+          example: "2025-01-01T00:00:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of last schedule update"
+          example: "2025-01-01T00:00:00.000Z"
+
+    ScheduleRequest:
+      type: object
+      required:
+        - responsible_employee_id
+        - responsible_client_id
+        - date_schedule
+        - services_ids
+      properties:
+        responsible_employee_id:
+          type: string
+          description: "Unique identifier for the responsible employee that will be performing the service"
+          example: "685f0bb40913590485a8e51a"
+        responsible_client_id:
+          type: string
+          description: "Unique identifier for the responsible client that will be receiving the service"
+          example: "685f0bb40913590485a8e51a"
+        status:
+          type: string
+          description: "Status of the schedule"
+          enum: ["pending", "in_progress", "confirmed", "cancelled", "completed"]
+          default: "pending"
+          example: "pending"
+        date_schedule:
+          type: string
+          format: date-time
+          description: "Date and time of the schedule"
+          example: "2025-01-01T00:00:00.000Z"
+        services_ids:
+          type: array
+          items:
+            type: string
+          description: "Unique identifiers for the services that will be performed"
+          example: ["685f0bb40913590485a8e51a", "685f0bb40913590485a8e51b"]
+          minItems: 1
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: "Unique identifier for the service"
+          example: "685f0bb40913590485a8e51a"
+        name:
+          type: string
+          description: "Name of the service"
+          example: "Haircut"
+        description:
+          type: string
+          description: "Description of the service"
+          example: "Haircut for men"
+        price:
+          type: number
+          format: float
+          description: "Price of the service"
+          example: 100.50
+          minimum: 0
+        estimated_duration:
+          type: integer
+          description: "Estimated duration of the service in minutes"
+          example: 30
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of service creation"
+          example: "2025-01-01T00:00:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of last service update"
+          example: "2025-01-01T00:00:00.000Z"
+
+    ServiceRequest:
+      type: object
+      required:
+        - name
+        - price
+        - estimated_duration
+      properties:
+        name:
+          type: string
+          description: "Name of the service"
+          example: "Haircut"
+          maxLength: 100
+        description:
+          type: string
+          description: "Description of the service"
+          example: "Haircut for men"
+          maxLength: 500
+        price:
+          type: number
+          format: float
+          description: "Price of the service"
+          example: 100.50
+          minimum: 0
+        estimated_duration:
+          type: integer
+          description: "Estimated duration of the service in minutes"
+          example: 30
+          minimum: 1
+          maximum: 1440
+
+    WorkSchedule:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: "Unique identifier for the work schedule"
+          example: "685f0bb40913590485a8e51a"
+        employee_id:
+          type: string
+          description: "Unique identifier for the employee"
+          example: "685f0bb40913590485a8e51a"
+        week_start_day:
+          type: string
+          format: date-time
+          description: "Date and time of the week start"
+          example: "2025-01-01T00:00:00.000Z"
+        work_days:
+          $ref: "#/components/schemas/WorkDays"
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of work schedule creation"
+          example: "2025-01-01T00:00:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Timestamp of last work schedule update"
+          example: "2025-01-01T00:00:00.000Z"
+
+    WorkScheduleRequest:
+      type: object
+      required:
+        - employee_id
+        - week_start_day
+        - work_days
+      properties:
+        employee_id:
+          type: string
+          description: "Unique identifier for the employee"
+          example: "685f0bb40913590485a8e51a"
+        week_start_day:
+          type: string
+          format: date-time
+          description: "Date and time of the week start"
+          example: "2025-01-01T00:00:00.000Z"
+        work_days:
+          $ref: "#/components/schemas/WorkDays"
+
+    WorkDays:
+      type: array
+      description: "Array of work days for the week (7 days - Sunday to Saturday)"
+      items:
+        $ref: "#/components/schemas/Day"
+      minItems: 7
+      maxItems: 7
+
+    Day:
+      type: object
+      required:
+        - is_working
+      properties:
+        is_working:
+          type: boolean
+          description: "Indicates if the employee is working on this day"
+          example: true
+        start_time:
+          type: string
+          description: "Start time of the work day in minutes from midnight (0-1439)"
+          example: "480"
+          pattern: "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|1[0-3][0-9][0-9]|14[0-3][0-9])$"
+        end_time:
+          type: string
+          description: "End time of the work day in minutes from midnight (0-1439)"
+          example: "1020"
+          pattern: "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|1[0-3][0-9][0-9]|14[0-3][0-9])$"
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          description: "Current page number"
+          example: 1
+        total_pages:
+          type: integer
+          description: "Total number of pages"
+          example: 10
+        total_items:
+          type: integer
+          description: "Total number of items"
+          example: 200
+        items_per_page:
+          type: integer
+          description: "Number of items per page"
+          example: 20
+        has_next:
+          type: boolean
+          description: "Indicates if there is a next page"
+          example: true
+        has_previous:
+          type: boolean
+          description: "Indicates if there is a previous page"
+          example: false
+
+    Error:
+      type: object
+      description: "Default template for error message. All returned errors will follow this template."
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: "Unique API code that indicates specific details of the error, or the actual status code of the response when the unique code is not appropriate."
+          example: 400
+        message:
+          type: string
+          description: "Readable and short description of the error."
+          example: "Bad Request"
+        description:
+          type: string
+          description: "Detailed description of the error."
+          example: "The request body is missing required fields."
+
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      required: false
+      description: The page number.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      description: The number of items to return.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    sortParam:
+      in: query
+      name: sort
+      required: false
+      description: >-
+        Contains the names of the attributes, separated by commas, that
+        will be used to sort the result of the query. For ascending sort,
+        use the '+' character before the attribute name. For descending
+        sort, use the '-' character before the attribute name. By default,
+        the order is ascending, so the '+' symbol is optional, just enter
+        the attribute.
+      schema:
+        type: array
+        items:
+          type: string
+        default:
+          - created_at
+      example: ["-created_at", "+name"]
+
+    filterParam:
+      in: query
+      name: filter
+      schema:
+        type: object
+      style: form
+      explode: true
+      description: >-
+        To filter a collection by multiple concurrent attributes or filter multiple values for an attribute,
+        simply use the attribute/property name with an equal sign and the expected values (separated by a comma):
+        **_property=value1,value2,value3_**. The query is not case sensitive.
+
+        Example: **_?type=direct_** to retrieve exactly the items with direct type.
+
+        For filtering with logical operators, just follow the syntax:
+
+        **_property=operator:value_**. The available operators are:
+         - **gt** -> Searches for items that have the attribute with a value greater than the specified (that is, >).
+         - **gte** -> Searches for items that have the attribute with a value greater than or equal to the one specified (that is, >=).
+         - **lt** -> Searches for items that have the attribute with a value less than the specified value (that is, <).
+         - **lte** -> Searches for items that have the attribute with a value less than or equal to the one specified (that is, <=).
+
+        Example: **_?value=gte:800&value=lt:1200_** to retrieve items with a value greater than or equal to 800 and less than 1200.
+
+  responses:
+    204:
+      description: "Operation performed successfully. There is no data to be returned"
+
+    400:
+      description: "Request can not be met, syntactically incorrect or violates the schema. Normally it occurs due to validation issues, such as fields that are expected in the request body and not passed."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    401:
+      description: "Authentication failed due to invalid authentication credentials."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    403:
+      description: "User does not have scope to access this resource."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    404:
+      description: "Specified resource does not exist. Usually when the URI is incorrect or the resource is not found, or even no longer exists."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    406:
+      description: "The server is not implementing the media type requested by the client for the application response. Only application/json is currently accepted."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    409:
+      description: "Conflicts have probably occurred with data that can not be duplicated."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    415:
+      description: >-
+        The server does not support the requested payload format. Only
+        application/json is accepted.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    429:
+      description: >-
+        The rate limit for requests exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    500:
+      description: >-
+        An internal server error occurred. Although the client appears to
+        provide a correct request, the server encountered an unexpected
+        condition that prevented it from responding to the request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
