@@ -16,7 +16,7 @@ import { ValidationException } from '../../application/domain/exception/validati
 export class ScheduleController {
     constructor(
         @inject(Identifier.SCHEDULE_SERVICE) private readonly _scheduleService: IScheduleService,
-    ) {}
+    ) { }
 
     @httpPost('/')
     public async createSchedule(@request() req: Request, @response() res: Response): Promise<Response> {
@@ -30,7 +30,7 @@ export class ScheduleController {
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
-               .send(handlerError.toJSON())
+                .send(handlerError.toJSON())
         }
     }
 
@@ -52,7 +52,7 @@ export class ScheduleController {
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
-               .send(handlerError.toJSON())
+                .send(handlerError.toJSON())
         }
     }
 
@@ -70,7 +70,7 @@ export class ScheduleController {
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
-               .send(handlerError.toJSON())
+                .send(handlerError.toJSON())
         }
     }
 
@@ -88,7 +88,7 @@ export class ScheduleController {
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
-               .send(handlerError.toJSON())
+                .send(handlerError.toJSON())
         }
     }
 
@@ -108,7 +108,7 @@ export class ScheduleController {
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)
-               .send(handlerError.toJSON())
+                .send(handlerError.toJSON())
         }
     }
 
@@ -125,6 +125,19 @@ export class ScheduleController {
             const result: Array<string> = await this._scheduleService.getAvaliableSlots(req.params.employee_id, query)
 
             return res.status(HttpStatus.OK).send(result)
+        } catch (err: any) {
+            const handlerError = ApiExceptionManager.build(err)
+            return res.status(handlerError.code)
+                .send(handlerError.toJSON())
+        }
+    }
+
+    @httpDelete('/:schedule_id')
+    public async deleteScheduleById(@request() req: Request, @response() res: Response): Promise<Response> {
+        try {
+            await this._scheduleService.remove(req.params.schedule_id)
+
+            return res.status(HttpStatus.NO_CONTENT).send()
         } catch (err: any) {
             const handlerError = ApiExceptionManager.build(err)
             return res.status(handlerError.code)

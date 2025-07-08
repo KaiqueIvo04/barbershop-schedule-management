@@ -84,49 +84,49 @@ paths:
           $ref: "#/components/responses/403"
         "500":
           $ref: "#/components/responses/500"
-    patch:
-      security:
-        - JWTAuth: ["sc:u"]
-      tags:
-        - Schedules
-      summary: Update multiple schedules
-      description: This endpoint updates multiple schedules
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                schedules:
-                  type: array
-                  items:
-                    allOf:
-                      - type: object
-                        properties:
-                          id:
-                            type: string
-                            description: "Schedule ID to update"
-                      - $ref: "#/components/schemas/ScheduleRequest"
-      responses:
-        "200":
-          description: Schedules updated successfully.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Schedule"
-        "400":
-          $ref: "#/components/responses/400"
-        "401":
-          $ref: "#/components/responses/401"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-        "500":
-          $ref: "#/components/responses/500"
+    # patch:
+    #   security:
+    #     - JWTAuth: ["sc:u"]
+    #   tags:
+    #     - Schedules
+    #   summary: Update multiple schedules
+    #   description: This endpoint updates multiple schedules
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             schedules:
+    #               type: array
+    #               items:
+    #                 allOf:
+    #                   - type: object
+    #                     properties:
+    #                       id:
+    #                         type: string
+    #                         description: "Schedule ID to update"
+    #                   - $ref: "#/components/schemas/ScheduleRequest"
+    #   responses:
+    #     "200":
+    #       description: Schedules updated successfully.
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: array
+    #             items:
+    #               $ref: "#/components/schemas/Schedule"
+    #     "400":
+    #       $ref: "#/components/responses/400"
+    #     "401":
+    #       $ref: "#/components/responses/401"
+    #     "403":
+    #       $ref: "#/components/responses/403"
+    #     "404":
+    #       $ref: "#/components/responses/404"
+    #     "500":
+    #       $ref: "#/components/responses/500"
 
   /v1/schedules/{id}:
     get:

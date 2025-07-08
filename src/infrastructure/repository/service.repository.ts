@@ -10,12 +10,12 @@ import { IQuery } from '../../application/port/query.interface'
 import { Query } from './query/query'
 
 @injectable()
-export class ServiceRepository extends BaseRepository<Service, ServiceEntity> implements IServiceRepository{
+export class ServiceRepository extends BaseRepository<Service, ServiceEntity> implements IServiceRepository {
     constructor(
         @inject(Identifier.SERVICE_REPO_MODEL) readonly _serviceRepoModel: any,
         @inject(Identifier.SERVICE_ENTITY_MAPPER) readonly _serviceEntityMapper: IEntityMapper<Service, ServiceEntity>,
         @inject(Identifier.LOGGER) readonly _logger: ILogger
-    ){
+    ) {
         super(_serviceRepoModel, _serviceEntityMapper, _logger)
     }
 
@@ -25,7 +25,7 @@ export class ServiceRepository extends BaseRepository<Service, ServiceEntity> im
         const set: any = { $set: itemUp }
 
         return new Promise<Service | undefined>((resolve, reject) => {
-            this.Model.findOneAndUpdate({ _id: itemUp.id}, set, { new: true })
+            this.Model.findOneAndUpdate({ _id: itemUp.id }, set, { new: true })
                 .exec()
                 .then((result: ServiceEntity) => {
                     if (!result) return resolve(undefined)
@@ -33,6 +33,10 @@ export class ServiceRepository extends BaseRepository<Service, ServiceEntity> im
                 })
                 .catch(err => reject(this.mongoDBErrorListener(err)))
         })
+    }
+
+    public findById(schedule_id: string): Promise<Service | undefined> {
+        return super.findOne(new Query().fromJSON({ filters: { _id: schedule_id } }))
     }
 
     // Check if a service already exists

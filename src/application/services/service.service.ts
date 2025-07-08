@@ -12,6 +12,7 @@ import { UpdateServiceValidator } from '../domain/validator/update.service.valid
 import { ObjectIdValidator } from '../domain/validator/object.id.validator'
 import { IQuery } from '../port/query.interface'
 import { ConflictException } from '../domain/exception/conflict.exception'
+import { NotFoundException } from '../domain/exception/not.found.exception'
 
 @injectable()
 export class ServiceService implements IServiceService {
@@ -82,10 +83,20 @@ export class ServiceService implements IServiceService {
 
     public async remove(id: string): Promise<boolean> {
         try {
+            // 1. Validate id parameter
             ObjectIdValidator.validate(id, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
 
-            const result: boolean = await this._serviceRepository.delete(id)
-            return Promise.resolve(result)
+            // 2. Check if service exists
+            const service = await this._serviceRepository.findById(id)
+            if (!service) {
+                throw new NotFoundException(
+                    Strings.SERVICE.NOT_FOUND,
+                    Strings.SERVICE.NOT_FOUND_DESCRIPTION
+                )
+            }
+
+            // 3. Remove service
+            return this._serviceRepository.delete(id)
         } catch (err) {
             return Promise.reject(err)
         }

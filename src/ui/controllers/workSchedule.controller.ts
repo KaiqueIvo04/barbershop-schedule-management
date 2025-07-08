@@ -111,6 +111,19 @@ export class WorkScheduleController {
         }
     }
 
+    @httpDelete('/:workschedule_id')
+    public async deleteScheduleById(@request() req: Request, @response() res: Response): Promise<Response> {
+        try {
+            await this._workScheduleService.remove(req.params.workSchedule_id)
+
+            return res.status(HttpStatus.NO_CONTENT).send()
+        } catch (err: any) {
+            const handlerError = ApiExceptionManager.build(err)
+            return res.status(handlerError.code)
+                .send(handlerError.toJSON())
+        }
+    }
+
     private toJSONView(workSchedule: WorkSchedule | Array<WorkSchedule> | undefined): object {
         if (workSchedule instanceof Array) return workSchedule.map(item => item.toJSON())
         return workSchedule?.toJSON()

@@ -11,13 +11,14 @@ import { CreateWorkScheduleValidator } from '../domain/validator/create.workSche
 import { UpdateWorkScheduleValidator } from '../domain/validator/update.workSchedule.validator'
 import { ObjectIdValidator } from '../domain/validator/object.id.validator'
 import { IQuery } from '../port/query.interface'
+import { NotFoundException } from '../domain/exception/not.found.exception'
 
 @injectable()
 export class WorkScheduleService {
     constructor(
-        @inject(Identifier.WORK_SCHEDULE_REPOSITORY) readonly workScheduleRepository: IWorkScheduleRepository,
+        @inject(Identifier.WORK_SCHEDULE_REPOSITORY) readonly _workScheduleRepository: IWorkScheduleRepository,
         @inject(Identifier.RABBITMQ_EVENT_BUS) private readonly _eventBus: IEventBus
-    ) {}
+    ) { }
 
     public async add(workSchedule: WorkSchedule): Promise<WorkSchedule | undefined> {
         try {
@@ -28,11 +29,11 @@ export class WorkScheduleService {
             await this.checkExistResponsibleUsers(workSchedule)
 
             // 3. Check possible duplicated workSchedule
-            const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
+            const workScheduleExists: WorkSchedule | undefined = await this._workScheduleRepository.checkExists(workSchedule)
             if (workScheduleExists) throw new ConflictException(Strings.WORK_SCHEDULE.ALREADY_REGISTERED)
 
             // 4. Create new WorkSchedule
-            const newWorkSchedule: WorkSchedule | undefined = await this.workScheduleRepository.create(workSchedule)
+            const newWorkSchedule: WorkSchedule | undefined = await this._workScheduleRepository.create(workSchedule)
 
             return Promise.resolve(newWorkSchedule)
         } catch (err) {
@@ -42,7 +43,7 @@ export class WorkScheduleService {
 
     public async getAll(query: IQuery): Promise<Array<WorkSchedule>> {
         try {
-            const workSchedules: Array<WorkSchedule> = await this.workScheduleRepository.find(query)
+            const workSchedules: Array<WorkSchedule> = await this._workScheduleRepository.find(query)
             return Promise.resolve(workSchedules)
         } catch (err) {
             return Promise.reject(err)
@@ -52,7 +53,7 @@ export class WorkScheduleService {
     public async getById(id: string, query: IQuery): Promise<WorkSchedule | undefined> {
         try {
             ObjectIdValidator.validate(id, Strings.WORK_SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
-            const workSchedule: WorkSchedule | undefined = await this.workScheduleRepository.findOne(query)
+            const workSchedule: WorkSchedule | undefined = await this._workScheduleRepository.findOne(query)
             return Promise.resolve(workSchedule)
         } catch (err) {
             return Promise.reject(err)
@@ -70,14 +71,14 @@ export class WorkScheduleService {
             // 3. Check if the work schedule exists and employee exists
             if (workSchedule.employee_id) await this.checkExistResponsibleEmployee(workSchedule.employee_id!)
 
-            const workScheduleExists: WorkSchedule | undefined = await this.workScheduleRepository.checkExists(workSchedule)
+            const workScheduleExists: WorkSchedule | undefined = await this._workScheduleRepository.checkExists(workSchedule)
             if (!workScheduleExists) throw new ConflictException(
                 Strings.WORK_SCHEDULE.ALREADY_REGISTERED,
                 Strings.WORK_SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', workSchedule.id)
             )
 
             // 4. Update WorkSchedule
-            const updatedWorkSchedule: WorkSchedule | undefined = await this.workScheduleRepository.update(workSchedule)
+            const updatedWorkSchedule: WorkSchedule | undefined = await this._workScheduleRepository.update(workSchedule)
 
             return Promise.resolve(updatedWorkSchedule)
         } catch (err) {
@@ -87,10 +88,20 @@ export class WorkScheduleService {
 
     public async remove(id: string): Promise<boolean> {
         try {
+            // 1. Validate id parameter
             ObjectIdValidator.validate(id, Strings.WORK_SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
 
-            const result: boolean = await this.workScheduleRepository.delete(id)
-            return Promise.resolve(result)
+            // 2. Check if work schedule exists
+            const workSchedule = await this._workScheduleRepository.findById(id)
+            if (!workSchedule) {
+                throw new NotFoundException(
+                    Strings.WORK_SCHEDULE.NOT_FOUND,
+                    Strings.WORK_SCHEDULE.NOT_FOUND_DESCRIPTION
+                )
+            }
+
+            // 3. Remove work schedule
+            return this._workScheduleRepository.delete(id)
         } catch (err) {
             return Promise.reject(err)
         }
@@ -98,7 +109,7 @@ export class WorkScheduleService {
 
     public async count(query: any): Promise<number> {
         try {
-            const total: number = await this.workScheduleRepository.count(query)
+            const total: number = await this._workScheduleRepository.count(query)
             return Promise.resolve(total)
         } catch (err) {
             return Promise.reject(err)

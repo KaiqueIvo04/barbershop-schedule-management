@@ -48,6 +48,10 @@ export class WorkScheduleRepository extends BaseRepository<WorkSchedule, WorkSch
         return this.findOne(query)
     }
 
+    public findById(schedule_id: string): Promise<WorkSchedule | undefined> {
+        return super.findOne(new Query().fromJSON({ filters: { _id: schedule_id } }))
+    }
+
     public async findByEmployeeAndDay(employee_id: string, day: Date): Promise<WorkSchedule | undefined> {
         const query: IQuery = new Query()
         query.addFilter({

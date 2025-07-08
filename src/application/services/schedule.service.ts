@@ -21,6 +21,7 @@ import { Service } from '../domain/model/service'
 import { Day } from '../domain/model/day'
 import { StringValidator } from '../domain/validator/string.validator'
 import { ScheduleStatusValidator } from '../domain/validator/schedule.status.validator'
+import { NotFoundException } from '../domain/exception/not.found.exception'
 
 @injectable()
 export class ScheduleService implements IScheduleService {
@@ -205,10 +206,20 @@ export class ScheduleService implements IScheduleService {
 
     public async remove(id: string): Promise<boolean> {
         try {
+            // 1. Validate id parameter
             ObjectIdValidator.validate(id, Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
 
-            const result: boolean = await this._scheduleRepository.delete(id)
-            return Promise.resolve(result)
+            // 2. Check if schedule exists
+            const schedule = await this._scheduleRepository.findById(id)
+            if (!schedule) {
+                throw new NotFoundException(
+                    Strings.SCHEDULE.NOT_FOUND,
+                    Strings.SCHEDULE.NOT_FOUND_DESCRIPTION
+                )
+            }
+
+            // 3. Remove schedule
+            return this._scheduleRepository.delete(id)
         } catch (err) {
             return Promise.reject(err)
         }

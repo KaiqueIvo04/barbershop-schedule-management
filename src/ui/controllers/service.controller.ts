@@ -109,6 +109,20 @@
             }
         }
 
+
+    @httpDelete('/:service_id')
+    public async deleteServiceById(@request() req: Request, @response() res: Response): Promise<Response> {
+        try {
+            await this._serviceService.remove(req.params.service_id)
+
+            return res.status(HttpStatus.NO_CONTENT).send()
+        } catch (err: any) {
+            const handlerError = ApiExceptionManager.build(err)
+            return res.status(handlerError.code)
+                .send(handlerError.toJSON())
+        }
+    }
+
         private toJSONView(service: Service | Array<Service> | undefined): object {
             if (service instanceof Array) return service.map(item => item.toJSON())
             return service?.toJSON()
