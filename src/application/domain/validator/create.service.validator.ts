@@ -1,9 +1,9 @@
+import { Strings } from '../../../utils/strings'
 import { ValidationException } from '../exception/validation.exception'
 import { Service } from '../model/service'
 import { NumberValidator } from './number.validator'
 import { ObjectIdValidator } from './object.id.validator'
 import { StringValidator } from './string.validator'
-
 
 export class CreateServiceValidator {
     public static validate(service: Service) {
@@ -25,6 +25,8 @@ export class CreateServiceValidator {
         // Optional fields
         if (service.description !== undefined) StringValidator.validate(service.description, 'description', true, true)
 
-        if (fields.length > 0) throw new ValidationException('REQUIRED_FIELDS', fields.join(', '))
+        if (fields.length > 0) throw new ValidationException(
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS,
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', fields.join(', ')))
     }
 }

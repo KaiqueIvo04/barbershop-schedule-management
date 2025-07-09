@@ -1,4 +1,5 @@
 import { Strings } from '../../../utils/strings'
+import { ValidationException } from '../exception/validation.exception'
 import { ObjectIdValidator } from './object.id.validator'
 import { ScheduleStatusValidator } from './schedule.status.validator'
 import { StringValidator } from './string.validator'
@@ -6,6 +7,13 @@ import { StringValidator } from './string.validator'
 export class UpdateScheduleValidator {
 
     public static validate(schedule: any) {
+        if (schedule.id) {
+            try {
+                ObjectIdValidator.validate(schedule.id)
+            } catch (err) {
+                throw new ValidationException(Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
+            }
+        }
         if (schedule.responsible_employee_id !== undefined) {
             ObjectIdValidator.validate(
                 schedule.responsible_employee_id,

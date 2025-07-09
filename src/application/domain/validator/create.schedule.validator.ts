@@ -1,7 +1,7 @@
 import { Strings } from '../../../utils/strings'
 import { ValidationException } from '../exception/validation.exception'
+import { DateValidator } from './date.validator'
 import { ObjectIdValidator } from './object.id.validator'
-import { StringValidator } from './string.validator'
 
 export class CreateScheduleValidator {
     public static validate(schedule: any) {
@@ -15,7 +15,7 @@ export class CreateScheduleValidator {
         else ObjectIdValidator.validate(schedule.responsible_client_id, Strings.CLIENT.PARAM_ID_NOT_VALID_FORMAT)
 
         if (schedule.date_schedule === undefined) fields.push('date_schedule')
-        else StringValidator.validate(schedule.date_schedule, 'date_schedule', false)
+        else DateValidator.validate(schedule.date_schedule)
 
         if (schedule.services_ids === undefined) fields.push('services_ids')
         else {
@@ -29,6 +29,8 @@ export class CreateScheduleValidator {
             })
         }
 
-        if (fields.length > 0) throw new ValidationException('REQUIRED_FIELDS', fields.join(', '))
+        if (fields.length > 0) throw new ValidationException(
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS,
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', fields.join(', ')))
     }
 }

@@ -37,6 +37,8 @@ export class CreateWorkScheduleValidator {
             CreateWorkDaysValidator.validate(workSchedule.work_days)
         }
 
-        if (fields.length > 0) throw new ValidationException('REQUIRED_FIELDS', fields.join(', '))
+        if (fields.length > 0) throw new ValidationException(
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS,
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', fields.join(', ')))
     }
 }

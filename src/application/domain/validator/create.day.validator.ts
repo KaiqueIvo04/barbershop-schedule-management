@@ -1,6 +1,7 @@
 import { BooleanValidator } from './boolean.validator'
 import { ValidationException } from '../exception/validation.exception'
 import { NumericStringValidator } from './numeric.string.validator'
+import { Strings } from '../../../utils/strings'
 
 export class CreateDayValidator {
     public static validate(day: any) {
@@ -18,6 +19,8 @@ export class CreateDayValidator {
             else NumericStringValidator.validate(day.end_time, 'end_time', false)
         }
 
-        if (fields.length > 0) throw new ValidationException('REQUIRED_FIELDS', fields.join(', '))
+        if (fields.length > 0) throw new ValidationException(
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS,
+            Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', fields.join(', ')))
     }
 }

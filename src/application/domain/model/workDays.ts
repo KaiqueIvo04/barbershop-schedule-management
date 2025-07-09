@@ -83,7 +83,7 @@ export class WorkDays extends Entity {
 
         return this
     }
-    // RESOLVER BUG QUE NÃO DEIXA COLOCAR UM DIA COM is_working = false
+
     public toJSON(): any {
         const resultJson: any = {
             monday: this.monday && Object.keys(this.monday).length ? this.monday.toJSON() : undefined,
