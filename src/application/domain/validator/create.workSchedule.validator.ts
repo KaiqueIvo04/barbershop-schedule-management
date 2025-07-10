@@ -11,10 +11,10 @@ export class CreateWorkScheduleValidator {
 
         // Required fields
         if (workSchedule.employee_id === undefined) fields.push('employee_id')
-        else ObjectIdValidator.validate(workSchedule.employee_id, 'The employee_id is not valid!')
+        else ObjectIdValidator.validate(workSchedule.employee_id)
 
         if (workSchedule.responsible_admin_id === undefined) fields.push('responsible_admin_id')
-        else ObjectIdValidator.validate(workSchedule.responsible_admin_id, 'The responsible_admin_id is not valid!')
+        else ObjectIdValidator.validate(workSchedule.responsible_admin_id)
 
         if (workSchedule.week_start_day === undefined) fields.push('week_start_day')
         else {

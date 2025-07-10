@@ -2,10 +2,19 @@ import { Strings } from '../../../utils/strings'
 import { ValidationException } from '../exception/validation.exception'
 import { Service } from '../model/service'
 import { NumberValidator } from './number.validator'
+import { ObjectIdValidator } from './object.id.validator'
 import { StringValidator } from './string.validator'
 
 export class UpdateServiceValidator {
     public static validate(service: Service) {
+        if (service.id) {
+            try {
+                ObjectIdValidator.validate(service.id)
+            } catch (err) {
+                throw new ValidationException(Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
+            }
+        }
+        
         if (service.service_name !== undefined) {
             StringValidator.validate(service.service_name, 'service_name', false, false)
             if (service.service_name.length < 4) throw new ValidationException(

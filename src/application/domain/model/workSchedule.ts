@@ -6,7 +6,7 @@ import { WorkDays } from './workDays'
 
 export class WorkSchedule extends Entity implements IJSONSerializable, IJSONDeserializable<WorkSchedule> {
     private _employee_id?: string
-    private _week_start_day?: Date
+    private _week_start_day?: Date | string
     private _work_days?: WorkDays
     private _responsible_admin_id?: string
 
@@ -17,10 +17,10 @@ export class WorkSchedule extends Entity implements IJSONSerializable, IJSONDese
         this._employee_id = value
     }
 
-    get week_start_day(): Date | undefined {
+    get week_start_day(): Date | string | undefined {
         return this._week_start_day
     }
-    set week_start_day(value: Date | undefined) {
+    set week_start_day(value: Date | string | undefined ) {
         this._week_start_day = value
     }
 
