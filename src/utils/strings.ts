@@ -34,6 +34,9 @@ export abstract class Strings {
         ALREADY_REGISTERED: 'Service is already registered...',
         ALREADY_REGISTERED_DESC: 'This an existent Service: {0}.',
         PARAM_ID_NOT_VALID_FORMAT: 'The service id is not valid!',
+        PRICE_NOT_NEGATIVE: 'The price of service can\'t be negative.',
+        ESTIMATED_DURATION_NOT_NEGATIVE: 'The estimated duration of service can\'t be negative.',
+        SERVICE_NAME_SHORTY: 'The service name must be greater than 4 characters.',
         NOT_FOUND: 'Service not found!',
         NOT_FOUND_DESCRIPTION: 'Service not found or already removed. A new operation for the same resource is required.',
     }

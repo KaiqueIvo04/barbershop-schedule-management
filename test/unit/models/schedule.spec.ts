@@ -22,7 +22,15 @@ describe('Schedule Validator Tests', () => {
             schedule.responsible_employee_id = 'invalid_id'
 
             expect(() => CreateScheduleValidator.validate(schedule))
-                .to.throw(ValidationException, Strings.EMPLOYEE.PARAM_ID_NOT_VALID_FORMAT)
+                .to.throw(ValidationException, Strings.ERROR_MESSAGE.VALIDATE.UUID_NOT_VALID_FORMAT)
+        })
+
+        it('should throw ValidationException when responsible_client_id is invalid', () => {
+            const schedule = new Schedule().fromJSON(ScheduleMock.generate())
+            schedule.responsible_client_id = 'invalid_id'
+
+            expect(() => CreateScheduleValidator.validate(schedule))
+                .to.throw(ValidationException, Strings.ERROR_MESSAGE.VALIDATE.UUID_NOT_VALID_FORMAT)
         })
 
         it('should throw ValidationException when date_schedule is invalid', () => {
@@ -43,7 +51,7 @@ describe('Schedule Validator Tests', () => {
 
         it('should pass validation when all required fields are valid', () => {
             const schedule = new Schedule().fromJSON(ScheduleMock.generate())
-            
+
             expect(() => CreateScheduleValidator.validate(schedule))
                 .not.to.throw(ValidationException)
         })

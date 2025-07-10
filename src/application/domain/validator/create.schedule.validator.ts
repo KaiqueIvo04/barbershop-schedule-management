@@ -9,10 +9,10 @@ export class CreateScheduleValidator {
 
         // Required fields
         if (schedule.responsible_employee_id === undefined) fields.push('responsible_employee_id')
-        else ObjectIdValidator.validate(schedule.responsible_employee_id, Strings.EMPLOYEE.PARAM_ID_NOT_VALID_FORMAT)
+        else ObjectIdValidator.validate(schedule.responsible_employee_id)
 
         if (schedule.responsible_client_id === undefined) fields.push('responsible_client_id')
-        else ObjectIdValidator.validate(schedule.responsible_client_id, Strings.CLIENT.PARAM_ID_NOT_VALID_FORMAT)
+        else ObjectIdValidator.validate(schedule.responsible_client_id)
 
         if (schedule.date_schedule === undefined) fields.push('date_schedule')
         else DateValidator.validate(schedule.date_schedule)
