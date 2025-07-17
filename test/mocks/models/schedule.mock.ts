@@ -7,7 +7,7 @@ export class ScheduleMock {
         schedule.id = DefaultFunctions.generateObjectId()
         schedule.responsible_employee_id = DefaultFunctions.generateObjectId()
         schedule.responsible_client_id = DefaultFunctions.generateObjectId()
-        schedule.date_schedule = '2025-07-09'
+        schedule.date_schedule = new Date('2025-07-09')
         schedule.services_ids = [
             DefaultFunctions.generateObjectId(),
             DefaultFunctions.generateObjectId()

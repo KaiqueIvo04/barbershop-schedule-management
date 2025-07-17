@@ -14,7 +14,7 @@ export class UpdateServiceValidator {
                 throw new ValidationException(Strings.SCHEDULE.PARAM_ID_NOT_VALID_FORMAT)
             }
         }
-        
+
         if (service.service_name !== undefined) {
             StringValidator.validate(service.service_name, 'service_name', false, false)
             if (service.service_name.length < 4) throw new ValidationException(

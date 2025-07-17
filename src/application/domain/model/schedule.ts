@@ -6,7 +6,7 @@ import { Entity } from './entity'
 export class Schedule extends Entity implements IJSONSerializable, IJSONDeserializable<Schedule> {
     private _responsible_employee_id?: string
     private _responsible_client_id?: string
-    private _date_schedule?: Date | string
+    private _date_schedule?: Date
     private _status?: string
     private _services_ids?: Array<string>
 
@@ -24,10 +24,10 @@ export class Schedule extends Entity implements IJSONSerializable, IJSONDeserial
         this._responsible_client_id = value
     }
 
-    public get date_schedule(): Date | string | undefined {
+    public get date_schedule(): Date | undefined {
         return this._date_schedule
     }
-    public set date_schedule(value: Date | string | undefined) {
+    public set date_schedule(value: Date | undefined) {
         this._date_schedule = value
     }
 
