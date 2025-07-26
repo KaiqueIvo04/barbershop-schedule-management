@@ -38,7 +38,7 @@ export abstract class Strings {
         ESTIMATED_DURATION_NOT_NEGATIVE: 'The estimated duration of service can\'t be negative.',
         SERVICE_NAME_SHORTY: 'The service name must be greater than 4 characters.',
         NOT_FOUND: 'Service not found!',
-        NOT_FOUND_DESCRIPTION: 'Service not found or already removed. A new operation for the same resource is required.',
+        NOT_FOUND_DESCRIPTION: 'One or more service not found or already removed. A new operation for the same resource is required.',
     }
 
     public static readonly SCHEDULE: any = {
@@ -51,6 +51,7 @@ export abstract class Strings {
         QUERY_AVALIABLE_SLOTS_NOT_VALID: 'Query of avaliable slots is not valid!',
         QUERY_AVALIABLE_SLOTS_NOT_VALID_DESC: 'The query needs service_id and day (Date).',
         DAY_NOT_VALID_DESC: 'The day parameter must be format of Date object.',
+        PAST_DATE: 'The date provided has already passed.',
         SERVICES_IDS_NOT_VALID: 'The services ids are not valid!',
         SERVICES_IDS_NOT_VALID_DESC: 'The services ids must be an array of strings.',
         NOT_FOUND: 'Schedule not found!',
@@ -102,7 +103,7 @@ export abstract class Strings {
             INVALID_DATE_FORMAT: 'Date: {0}, is not in valid ISO 8601 format.',
             INVALID_DATE_FORMAT_DESC: 'Date must be in the format: yyyy-MM-dd',
             INVALID_DATETIME_FORMAT: 'Datetime: {0}, is not in valid ISO 8601 format.',
-            INVALID_DATETIME_FORMAT_DESC: 'Datetime must be in the format: yyyy-MM-ddTHH:mm:ssZ'
+            INVALID_DATETIME_FORMAT_DESC: 'Datetime must be in the format: yyyy-MM-ddTHH:mm'
         },
         EVENT_BUS: {
             DEFAULT_MESSAGE: 'An event bus error has occurred.',

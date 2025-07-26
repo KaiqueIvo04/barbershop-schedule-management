@@ -2,27 +2,45 @@ import { ValidationException } from '../exception/validation.exception'
 import { Strings } from '../../../utils/strings'
 
 export class DateValidator {
-    public static validate(date: string): void | ValidationException {
-        // validate datetime
-        if (!(/^\d{4}-(0[1-9]|1[0-2])-\d\d$/i).test(date)) {
-            throw new ValidationException(Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', date),
-                Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT_DESC)
-        }
-
-        // Validate day
-        // Parse the date parts to integers
-        const parts = date.split('-')
-        const year = parseInt(parts[0], 10)
-        const month = parseInt(parts[1], 10)
-        const day = parseInt(parts[2], 10)
-        const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-        // Adjust for leap years
-        if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) monthLength[1] = 29
-
-        // Check the range of the day
-        if (!(day > 0 && day <= monthLength[month - 1])) {
-            throw new ValidationException(Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', date))
-        }
+  public static validate(dateTime: string): void | ValidationException {
+    // Validar o formato: YYYY-MM-DDTHH:mm
+    const regex = /^\d{4}-(0[1-9]|1[0-2])-\d\dT([01]\d|2[0-3]):[0-5]\d$/
+    if (!regex.test(dateTime)) {
+      throw new ValidationException(
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', dateTime),
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATETIME_FORMAT_DESC
+      )
     }
+
+    const [date, time] = dateTime.split('T')
+
+    // Validar a parte da data
+    const parts = date.split('-')
+    const year = parseInt(parts[0], 10)
+    const month = parseInt(parts[1], 10)
+    const day = parseInt(parts[2], 10)
+    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    // Ajuste para anos bissextos
+    if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
+      monthLength[1] = 29
+    }
+
+    if (!(day > 0 && day <= monthLength[month - 1])) {
+      throw new ValidationException(
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', dateTime)
+      )
+    }
+
+    // Outra validação para horas e minutos
+    const [hourStr, minuteStr] = time.split(':')
+    const hour = parseInt(hourStr, 10)
+    const minute = parseInt(minuteStr, 10)
+
+    if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59)) {
+      throw new ValidationException(
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', dateTime)
+      )
+    }
+  }
 }

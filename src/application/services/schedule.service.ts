@@ -41,17 +41,26 @@ export class ScheduleService implements IScheduleService {
             // 2. Check if the responsible users exists
             await this.checkExistResponsibleUsers(schedule)
 
-            // 3. Check possible duplicated schedule
+            // 3. Check if the services exists
+            for (const service of schedule.services_ids!) {
+                const serviceExists: Service | undefined = await this._serviceRepository.findById(service)
+                if (!serviceExists) throw new NotFoundException(
+                    Strings.SERVICE.NOT_FOUND,
+                    Strings.SERVICE.NOT_FOUND_DESCRIPTION
+                )
+            }
+
+            // 4. Check possible duplicated schedule
             const scheduleExists: Schedule | undefined = await this._scheduleRepository.checkExists(schedule)
             if (scheduleExists) throw new ConflictException(
                 Strings.SCHEDULE.ALREADY_REGISTERED,
                 Strings.SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', scheduleExists.id)
             )
 
-            // 4. Set status to pending
+            // 5. Set status to pending
             schedule.status = ScheduleStatus.PENDING
 
-            // 5. Create schedule
+            // 6. Create schedule
             const newSchedule: Schedule | undefined = await this._scheduleRepository.create(schedule)
             // ESTÁ CRIANDO COM A HORA EM 3 HORAS A MAIS DO HORÁRIO ATUAL
 

@@ -15,7 +15,12 @@ export class CreateScheduleValidator {
         else ObjectIdValidator.validate(schedule.responsible_client_id)
 
         if (schedule.date_schedule === undefined) fields.push('date_schedule')
-        else DateValidator.validate(schedule.date_schedule)
+        else {
+            DateValidator.validate(schedule.date_schedule)
+            const currentDate: Date = new Date()
+            const providedDate: Date = new Date(schedule.date_schedule)
+            if (currentDate >= providedDate) throw new ValidationException(Strings.SCHEDULE.PAST_DATE)
+        }
 
         if (schedule.services_ids === undefined) fields.push('services_ids')
         else {
