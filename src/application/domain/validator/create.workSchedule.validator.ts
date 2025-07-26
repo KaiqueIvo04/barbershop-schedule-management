@@ -1,9 +1,9 @@
 import { ObjectIdValidator } from './object.id.validator'
-import { StringValidator } from './string.validator'
 import { ValidationException } from '../exception/validation.exception'
 import { Strings } from '../../../utils/strings'
 import { WorkDays } from '../model/workDays'
 import { CreateWorkDaysValidator } from './create.workDays.validator'
+import { DateValidator } from './date.validator'
 
 export class CreateWorkScheduleValidator {
     public static validate(workSchedule: any) {
@@ -18,9 +18,14 @@ export class CreateWorkScheduleValidator {
 
         if (workSchedule.week_start_day === undefined) fields.push('week_start_day')
         else {
-            StringValidator.validate(workSchedule.week_start_day, 'week_start_day', false)
+            DateValidator.validate(workSchedule.week_start_day)
+            const currentDate: Date = new Date()
+            const providedDate: Date = new Date(workSchedule.week_start_day)
+
+            if (currentDate >= providedDate) throw new ValidationException(Strings.SCHEDULE.PAST_DATE)
+
             const date = new Date(workSchedule.week_start_day)
-            if (date.getDay() + 1 !== 1) { // 1 = Monday
+            if (date.getDay() !== 1) { // 1 = Segunda-feira
                 throw new ValidationException(
                     Strings.WORK_SCHEDULE.WEEK_START_DAY_NOT_VALID,
                     Strings.WORK_SCHEDULE.WEEK_START_DAY_NOT_VALID_DESC

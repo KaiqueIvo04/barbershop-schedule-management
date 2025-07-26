@@ -1,8 +1,8 @@
 import { Strings } from '../../../utils/strings'
 import { ValidationException } from '../exception/validation.exception'
+import { DateValidator } from './date.validator'
 import { ObjectIdValidator } from './object.id.validator'
 import { ScheduleStatusValidator } from './schedule.status.validator'
-import { StringValidator } from './string.validator'
 
 export class UpdateScheduleValidator {
 
@@ -28,7 +28,12 @@ export class UpdateScheduleValidator {
             )
         }
 
-        if (schedule.date_schedule !== undefined) StringValidator.validate(schedule.date_schedule, 'date_schedule', false)
+        if (schedule.date_schedule !== undefined) {
+            DateValidator.validate(schedule.date_schedule)
+            const currentDate: Date = new Date()
+            const providedDate: Date = new Date(schedule.date_schedule)
+            if (currentDate >= providedDate) throw new ValidationException(Strings.SCHEDULE.PAST_DATE)
+        }
 
         if (schedule.status !== undefined) ScheduleStatusValidator.validate(schedule.status)
     }

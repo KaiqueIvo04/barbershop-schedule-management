@@ -170,6 +170,15 @@ export class ScheduleService implements IScheduleService {
             // 2. Check if the responsible users exists
             await this.checkExistResponsibleUsers(schedule)
 
+            // 3. Check if the services exists
+            for (const service of schedule.services_ids!) {
+                const serviceExists: Service | undefined = await this._serviceRepository.findById(service)
+                if (!serviceExists) throw new NotFoundException(
+                    Strings.SERVICE.NOT_FOUND,
+                    Strings.SERVICE.NOT_FOUND_DESCRIPTION
+                )
+            }
+
             // 3. Update schedule
             const updatedSchedule: Schedule | undefined = await this._scheduleRepository.update(schedule)
             return Promise.resolve(updatedSchedule)
