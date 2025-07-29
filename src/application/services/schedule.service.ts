@@ -321,7 +321,7 @@ export class ScheduleService implements IScheduleService {
             formattedDate, // Format yyyy-mm-ddT00:00
             servicesToCheck
         )
-        console.log(slots)
+
         if (slots.length === 0) throw new ValidationException(Strings.SCHEDULE.SLOTS_NOT_FOUND)
 
         // Extract time
