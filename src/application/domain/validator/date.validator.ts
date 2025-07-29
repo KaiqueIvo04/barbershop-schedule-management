@@ -43,4 +43,35 @@ export class DateValidator {
       )
     }
   }
+
+  public static validateDateOnly(date: string): void | ValidationException {
+    // Validar o formato: YYYY-MM-DD
+    const regex = /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/
+    if (!regex.test(date)) {
+      throw new ValidationException(
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', date),
+        'Expected format: YYYY-MM-DD'
+      )
+    }
+
+    const [yearStr, monthStr, dayStr] = date.split('-')
+    const year = parseInt(yearStr, 10)
+    const month = parseInt(monthStr, 10)
+    const day = parseInt(dayStr, 10)
+
+    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    // Ajuste para anos bissextos
+    if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
+      monthLength[1] = 29
+    }
+
+    // Validação lógica da data
+    if (month < 1 || month > 12 || day < 1 || day > monthLength[month - 1]) {
+      throw new ValidationException(
+        Strings.ERROR_MESSAGE.DATE.INVALID_DATE_FORMAT.replace('{0}', date),
+        'Invalid day for the given month'
+      )
+    }
+  }
 }

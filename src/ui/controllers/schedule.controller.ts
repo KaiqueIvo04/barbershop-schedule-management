@@ -11,6 +11,7 @@ import { NotFoundException } from '../../application/domain/exception/not.found.
 import { IQuery } from '../../application/port/query.interface'
 import { Query } from '../../infrastructure/repository/query/query'
 import { ValidationException } from '../../application/domain/exception/validation.exception'
+import { DateValidator } from '../../application/domain/validator/date.validator'
 
 @controller('/v1/schedules')
 export class ScheduleController {
@@ -112,17 +113,22 @@ export class ScheduleController {
         }
     }
 
-    @httpGet('/avaliableslots/:employee_id')
-    public async getAvaliableSlots(@request() req: Request, @response() res: Response): Promise<Response> {
+    @httpPost('/availableslots')
+    public async getAvailableSlots(@request() req: Request, @response() res: Response): Promise<Response> {
         try {
-            const query: IQuery = new Query().fromJSON(req.query)
+            const { employee_id, day, services_ids } = req.body
 
-            if ((!query.filters.day) || (!query.filters.service_id)) throw new ValidationException(
-                Strings.SCHEDULE.QUERY_AVALIABLE_SLOTS_NOT_VALID,
-                Strings.SCHEDULE.QUERY_AVALIABLE_SLOTS_NOT_VALID_DESC
-            )
+            if (!employee_id || !day || !Array.isArray(services_ids) || services_ids.length === 0) {
+                throw new ValidationException(
+                    Strings.ERROR_MESSAGE.REQUIRED_FIELDS,
+                    Strings.SCHEDULE.QUERY_AVALIABLE_SLOTS_NOT_VALID_DESC
+                )
+            }
 
-            const result: Array<string> = await this._scheduleService.getAvaliableSlots(req.params.employee_id, query)
+            DateValidator.validateDateOnly(day)
+            const date: string = day + 'T00:00'
+
+            const result: Array<string> = await this._scheduleService.getAvailableSlots(employee_id, date, services_ids)
 
             return res.status(HttpStatus.OK).send(result)
         } catch (err: any) {

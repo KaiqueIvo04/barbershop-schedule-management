@@ -29,6 +29,11 @@ export class CreateScheduleValidator {
                 Strings.SCHEDULE.SERVICES_IDS_NOT_VALID_DESC
             )
 
+            if (schedule.services_ids.length === 0) throw new ValidationException(
+                Strings.SCHEDULE.SERVICES_IDS_NOT_VALID,
+                Strings.SCHEDULE.SERVICES_IDS_EMPTY
+            )
+
             schedule.services_ids.forEach((service_id: string) => {
                 ObjectIdValidator.validate(service_id, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
             })

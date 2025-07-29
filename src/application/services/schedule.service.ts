@@ -50,19 +50,41 @@ export class ScheduleService implements IScheduleService {
                 )
             }
 
-            // 4. Check possible duplicated schedule
+            // 4. Check if employee is available in date
+            const scheduleDate = new Date(schedule.date_schedule!)
+            const year = scheduleDate.getFullYear()
+            const month = String(scheduleDate.getMonth() + 1).padStart(2, '0') // +1 months starts in 0
+            const day = String(scheduleDate.getDate()).padStart(2, '0')
+
+            const formattedDate = `${year}-${month}-${day}T00:00` // Put in format of function getAvailableSlots
+
+            const slots: Array<string> = await this.getAvailableSlots( // Reuse of function of endpoint post/availableslots
+                schedule.responsible_employee_id!,
+                formattedDate, // Format yyyy-mm-ddT00:00
+                schedule.services_ids!
+            )
+            if (slots.length === 0) throw new ValidationException(Strings.SCHEDULE.SLOTS_NOT_FOUND)
+
+            // Extract time
+            const requestedTime = `${scheduleDate.getHours().toString().padStart(2, '0')}:${scheduleDate.getMinutes().toString().padStart(2, '0')}`
+
+            const isTimeAvailable = slots.includes(requestedTime) // Verify disponibility of times
+            if (!isTimeAvailable) throw new ConflictException(Strings.SCHEDULE.UNAVAILABLE_TIME)
+
+            // 5. Check possible duplicated schedule
+            scheduleDate.setHours(scheduleDate.getHours() - 3) // Adjust to local time
+            schedule.date_schedule = scheduleDate
             const scheduleExists: Schedule | undefined = await this._scheduleRepository.checkExists(schedule)
             if (scheduleExists) throw new ConflictException(
                 Strings.SCHEDULE.ALREADY_REGISTERED,
                 Strings.SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', scheduleExists.id)
             )
 
-            // 5. Set status to pending
+            // 6. Set status to pending
             schedule.status = ScheduleStatus.PENDING
 
-            // 6. Create schedule
+            // 7. Create schedule
             const newSchedule: Schedule | undefined = await this._scheduleRepository.create(schedule)
-            // ESTÁ CRIANDO COM A HORA EM 3 HORAS A MAIS DO HORÁRIO ATUAL
 
             return Promise.resolve(newSchedule)
         } catch (err) {
@@ -89,53 +111,84 @@ export class ScheduleService implements IScheduleService {
         }
     }
 
-    public async getAvaliableSlots(employee_id: string, query: IQuery): Promise<Array<string>> {
+    public async getAvailableSlots(employee_id: string, day: string, services_ids: Array<string>): Promise<Array<string>> {
         try {
             // 1. Validate params
             ObjectIdValidator.validate(employee_id, Strings.EMPLOYEE.PARAM_ID_NOT_VALID_FORMAT)
-            ObjectIdValidator.validate(query.filters.service_id, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
-
-            if (typeof query.filters.day !== 'string') throw new ValidationException(
+            if (!day) {
+                throw new ValidationException(
+                    Strings.ERROR_MESSAGE.REQUIRED_FIELDS,
+                    Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', 'day')
+                )
+            }
+            if (!services_ids) throw new ValidationException(
                 Strings.ERROR_MESSAGE.REQUIRED_FIELDS,
-                Strings.SCHEDULE.DAY_NOT_VALID_DESC
+                Strings.ERROR_MESSAGE.VALIDATE.REQUIRED_FIELDS_DESC.replace('{0}', 'services_ids')
             )
-            const day: Date = new Date(query.filters.day)
+            if (services_ids.length === 0) throw new ValidationException(
+                Strings.SCHEDULE.SERVICES_IDS_NOT_VALID,
+                Strings.SCHEDULE.SERVICES_IDS_EMPTY
+            )
+            for (const serviceId of services_ids) {
+                ObjectIdValidator.validate(serviceId, Strings.SERVICE.PARAM_ID_NOT_VALID_FORMAT)
+            }
+
+            const date: Date = new Date(day)
+
             // 2. Check exists employee and Find work schedule of employee
             await this.checkExistResponsibleEmployee(employee_id)
             const workSchedule: WorkSchedule | undefined = await this._workScheduleRepository.findByEmployeeAndDay(
                 employee_id,
-                day
+                date
             )
-            if (!workSchedule) return []
+            if (!workSchedule) throw new ValidationException(
+                Strings.WORK_SCHEDULE.NOT_FOUND,
+                Strings.WORK_SCHEDULE.EMPLOYEE_NO_HAVE_WORK_SCHEDULE
+            )
 
-            // 3. Find duration of target service
+            // 3. Find and calculate total duration of target services
             const serviceQuery: IQuery = new Query()
             serviceQuery.addFilter({
-                _id: query.filters.service_id
+                _id: { $in: services_ids }
             })
-            const service: Service | undefined = await this._serviceRepository.findOne(serviceQuery)
-            if (!service) return []
 
-            // 4. Find schedules existants of day
-            const existingSchedules: Array<Schedule> | undefined = await this._scheduleRepository.findByEmployeeAndDate(
-                employee_id, day
+            const services: Array<Service> = await this._serviceRepository.find(serviceQuery)
+            if (services.length === 0) throw new ValidationException(
+                Strings.SERVICE.NOT_FOUND,
+                Strings.SERVICE.NOT_FOUND_DESCRIPTION
             )
 
-            // 5. Verify if employee works in day
-            const dayOfWeek: string = this.getDayOfWeekName(day)
+            const totalDuration = services.reduce((total, service) => {
+                return total + (service.estimated_duration || 0)
+            }, 0)
+
+            if (totalDuration <= 0) throw new ValidationException(
+                Strings.SCHEDULE.SERVICES_DURATIONS_INVALID
+            )
+
+            // 4. Find existing schedules of the date
+            const existingSchedules: Array<Schedule> | undefined = await this._scheduleRepository.findByEmployeeAndDate(
+                employee_id,
+                date
+            )
+
+            // 5. Verify if employee works on this day
+            const dayOfWeek: string = this.getDayOfWeekName(date)
             if (!workSchedule.work_days![dayOfWeek].is_working) {
-                return []
+                throw new ValidationException(
+                    Strings.WORK_SCHEDULE.EMPLOYEE_NOT_WORKS
+                )
             }
 
-            // 6. Generate slots
+            // 6. Generate slots using total duration
             const daySchedule: Day = workSchedule.work_days![dayOfWeek]
             const slots: Array<string> = this.generateTimeSlots(
                 daySchedule.start_time!,
                 daySchedule.end_time!,
-                service.estimated_duration!,
+                totalDuration
             )
 
-            // 7. Collect schedules durations and times
+            // 7. Collect existing schedules durations and times
             const occupiedPeriods: Array<{ start: number, end: number }> = []
 
             if (existingSchedules && existingSchedules.length > 0) {
@@ -151,9 +204,8 @@ export class ScheduleService implements IScheduleService {
                 }
             }
 
-            // 8. Filter available slots
-            const availableSlots = this.filterSlots(slots, occupiedPeriods, service.estimated_duration!)
-
+            // 8. Filter available slots using total duration
+            const availableSlots = this.filterSlots(slots, occupiedPeriods, totalDuration)
 
             return availableSlots
 

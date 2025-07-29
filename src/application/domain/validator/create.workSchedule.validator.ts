@@ -18,13 +18,9 @@ export class CreateWorkScheduleValidator {
 
         if (workSchedule.week_start_day === undefined) fields.push('week_start_day')
         else {
-            DateValidator.validate(workSchedule.week_start_day)
-            const currentDate: Date = new Date()
-            const providedDate: Date = new Date(workSchedule.week_start_day)
+            DateValidator.validateDateOnly(workSchedule.week_start_day)
 
-            if (currentDate >= providedDate) throw new ValidationException(Strings.SCHEDULE.PAST_DATE)
-
-            const date = new Date(workSchedule.week_start_day)
+            const date = new Date(workSchedule.week_start_day + 'T00:00')
             if (date.getDay() !== 1) { // 1 = Segunda-feira
                 throw new ValidationException(
                     Strings.WORK_SCHEDULE.WEEK_START_DAY_NOT_VALID,
