@@ -56,7 +56,7 @@ export abstract class Strings {
         SERVICES_IDS_EMPTY: 'The services ids can not be empty list.',
         SERVICES_DURATIONS_INVALID: 'Services durations sum is less than or equal to zero.',
         SLOTS_NOT_FOUND: 'The vacancies for this day ended.',
-        UNAVAILABLE_TIME: 'This time is not available in the employee\'s work schedule!',
+        UNAVAILABLE_TIME: 'The vacancies of this time is not available or already completed!',
         NOT_FOUND: 'Schedule not found!',
         NOT_FOUND_DESCRIPTION: 'Schedule not found or already removed. A new operation for the same resource is required.',
     }

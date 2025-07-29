@@ -32,7 +32,7 @@ export class ScheduleService implements IScheduleService {
         @inject(Identifier.SERVICE_REPOSITORY) private readonly _serviceRepository: IServiceRepository,
         @inject(Identifier.RABBITMQ_EVENT_BUS) private readonly _eventBus: IEventBus
     ) { }
-
+    // ----------------------ENDPOINT PUBLIC FUNCTIONS----------------------
     public async add(schedule: Schedule): Promise<Schedule | undefined> {
         try {
             // 1. Validate fields of schedule
@@ -50,40 +50,13 @@ export class ScheduleService implements IScheduleService {
                 )
             }
 
-            // 4. Check if employee is available in date
-            const scheduleDate = new Date(schedule.date_schedule!)
-            const year = scheduleDate.getFullYear()
-            const month = String(scheduleDate.getMonth() + 1).padStart(2, '0') // +1 months starts in 0
-            const day = String(scheduleDate.getDate()).padStart(2, '0')
+            // 4. Validate schedule conflicts
+            await this.validateScheduleConflicts(schedule)
 
-            const formattedDate = `${year}-${month}-${day}T00:00` // Put in format of function getAvailableSlots
-
-            const slots: Array<string> = await this.getAvailableSlots( // Reuse of function of endpoint post/availableslots
-                schedule.responsible_employee_id!,
-                formattedDate, // Format yyyy-mm-ddT00:00
-                schedule.services_ids!
-            )
-            if (slots.length === 0) throw new ValidationException(Strings.SCHEDULE.SLOTS_NOT_FOUND)
-
-            // Extract time
-            const requestedTime = `${scheduleDate.getHours().toString().padStart(2, '0')}:${scheduleDate.getMinutes().toString().padStart(2, '0')}`
-
-            const isTimeAvailable = slots.includes(requestedTime) // Verify disponibility of times
-            if (!isTimeAvailable) throw new ConflictException(Strings.SCHEDULE.UNAVAILABLE_TIME)
-
-            // 5. Check possible duplicated schedule
-            scheduleDate.setHours(scheduleDate.getHours() - 3) // Adjust to local time
-            schedule.date_schedule = scheduleDate
-            const scheduleExists: Schedule | undefined = await this._scheduleRepository.checkExists(schedule)
-            if (scheduleExists) throw new ConflictException(
-                Strings.SCHEDULE.ALREADY_REGISTERED,
-                Strings.SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', scheduleExists.id)
-            )
-
-            // 6. Set status to pending
+            // 5. Set status to pending
             schedule.status = ScheduleStatus.PENDING
 
-            // 7. Create schedule
+            // 6. Create schedule
             const newSchedule: Schedule | undefined = await this._scheduleRepository.create(schedule)
 
             return Promise.resolve(newSchedule)
@@ -223,15 +196,22 @@ export class ScheduleService implements IScheduleService {
             await this.checkExistResponsibleUsers(schedule)
 
             // 3. Check if the services exists
-            for (const service of schedule.services_ids!) {
-                const serviceExists: Service | undefined = await this._serviceRepository.findById(service)
-                if (!serviceExists) throw new NotFoundException(
-                    Strings.SERVICE.NOT_FOUND,
-                    Strings.SERVICE.NOT_FOUND_DESCRIPTION
-                )
+            if (schedule.services_ids) {
+                for (const service of schedule.services_ids!) {
+                    const serviceExists: Service | undefined = await this._serviceRepository.findById(service)
+                    if (!serviceExists) throw new NotFoundException(
+                        Strings.SERVICE.NOT_FOUND,
+                        Strings.SERVICE.NOT_FOUND_DESCRIPTION
+                    )
+                }
             }
 
-            // 3. Update schedule
+            // 4. Validate schedule time conflicts (only if relevant fields are being updated)
+            if (schedule.date_schedule || schedule.services_ids || schedule.responsible_employee_id) {
+                await this.validateScheduleConflicts(schedule, true) // true indica que é uma atualização
+            }
+
+            // 5. Update schedule
             const updatedSchedule: Schedule | undefined = await this._scheduleRepository.update(schedule)
             return Promise.resolve(updatedSchedule)
         } catch (err) {
@@ -304,28 +284,108 @@ export class ScheduleService implements IScheduleService {
         }
     }
 
-    // AUX FUNCTIONS
-    private async checkExistResponsibleUsers(schedule: Schedule): Promise<any> {
-        try {
-            const resultEmployee: any = await this._eventBus.executeResource(
-                'account.rpc', 'employee.findone', schedule.responsible_employee_id
-            )
-            const resultClient: any = await this._eventBus.executeResource(
-                'account.rpc', 'client.findone', schedule.responsible_client_id
-            )
+    // ----------------------AUX PRIVATE FUNCTIONS----------------------
+    private async validateScheduleConflicts(schedule: Schedule, isUpdate: boolean = false): Promise<void> {
+        let dateToCheck = schedule.date_schedule!
+        let servicesToCheck = schedule.services_ids!
+        let employeeToCheck = schedule.responsible_employee_id!
+        let clientToCheck = schedule.responsible_client_id!
 
-            if (!resultEmployee) {
-                throw new ValidationException(
-                    Strings.EMPLOYEE.REGISTER_REQUIRED,
-                    Strings.EMPLOYEE.DESCRIPTION_REGISTER_REQUIRED
+        // Se for uma atualização, buscar os dados atuais para preencher campos não fornecidos
+        if (isUpdate) {
+            const currentSchedule: Schedule | undefined = await this._scheduleRepository.findById(schedule.id!)
+            if (!currentSchedule) {
+                throw new NotFoundException(
+                    Strings.SCHEDULE.NOT_FOUND,
+                    Strings.SCHEDULE.NOT_FOUND_DESCRIPTION
                 )
             }
 
-            if (!resultClient) {
-                throw new ValidationException(
-                    Strings.CLIENT.REGISTER_REQUIRED,
-                    Strings.CLIENT.DESCRIPTION_REGISTER_REQUIRED
+            // Use new values if provided, otherwise use current values
+            dateToCheck = schedule.date_schedule || currentSchedule.date_schedule!
+            servicesToCheck = schedule.services_ids || currentSchedule.services_ids!
+            employeeToCheck = schedule.responsible_employee_id || currentSchedule.responsible_employee_id!
+            clientToCheck = schedule.responsible_client_id || currentSchedule.responsible_client_id!
+        }
+
+        // Check if employee is available in date
+        const scheduleDate = new Date(dateToCheck)
+        const year = scheduleDate.getFullYear()
+        const month = String(scheduleDate.getMonth() + 1).padStart(2, '0') // +1 months starts in 0
+        const day = String(scheduleDate.getDate()).padStart(2, '0')
+
+        const formattedDate = `${year}-${month}-${day}T00:00` // Put in format of function getAvailableSlots
+
+        const slots: Array<string> = await this.getAvailableSlots( // Reuse of function of endpoint post/availableslots
+            employeeToCheck,
+            formattedDate, // Format yyyy-mm-ddT00:00
+            servicesToCheck
+        )
+        console.log(slots)
+        if (slots.length === 0) throw new ValidationException(Strings.SCHEDULE.SLOTS_NOT_FOUND)
+
+        // Extract time
+        const requestedTime = `${scheduleDate.getHours().toString().padStart(2, '0')}:${scheduleDate.getMinutes().toString().padStart(2, '0')}`
+
+        const isTimeAvailable = slots.includes(requestedTime) // Verify disponibility of times
+        if (!isTimeAvailable) throw new ConflictException(Strings.SCHEDULE.UNAVAILABLE_TIME)
+
+        // Check possible duplicated schedule
+        const adjustedDate = new Date(scheduleDate)
+        adjustedDate.setHours(adjustedDate.getHours() - 3) // Adjust to local time
+
+        // Create a temporary schedule object for conflict checking
+        const scheduleToCheck = new Schedule()
+        scheduleToCheck.date_schedule = adjustedDate
+        scheduleToCheck.responsible_employee_id = employeeToCheck
+        scheduleToCheck.responsible_client_id = clientToCheck
+        scheduleToCheck.services_ids = servicesToCheck
+
+        const conflictingSchedule: Schedule | undefined = await this._scheduleRepository.checkExists(scheduleToCheck)
+
+        // If there's a conflicting schedule
+        if (conflictingSchedule) {
+            // For updates, check if it's not the same schedule being updated
+            if (isUpdate && conflictingSchedule.id === schedule.id) {
+                // It's the same schedule, no conflict
+                return
+            }
+
+            // There's a real conflict
+            throw new ConflictException(
+                Strings.SCHEDULE.ALREADY_REGISTERED,
+                Strings.SCHEDULE.ALREADY_REGISTERED_DESC.replace('{0}', conflictingSchedule.id!)
+            )
+        }
+
+        // Update the schedule object with adjusted date
+        schedule.date_schedule = adjustedDate
+    }
+
+    private async checkExistResponsibleUsers(schedule: Schedule): Promise<any> {
+        try {
+            if (schedule.responsible_employee_id) {
+                const resultEmployee: any = await this._eventBus.executeResource(
+                    'account.rpc', 'employee.findone', schedule.responsible_employee_id
                 )
+                if (!resultEmployee) {
+                    throw new ValidationException(
+                        Strings.EMPLOYEE.REGISTER_REQUIRED,
+                        Strings.EMPLOYEE.DESCRIPTION_REGISTER_REQUIRED
+                    )
+                }
+            }
+
+            if (schedule.responsible_client_id) {
+                const resultClient: any = await this._eventBus.executeResource(
+                    'account.rpc', 'client.findone', schedule.responsible_client_id
+                )
+                if (!resultClient) {
+                    throw new ValidationException(
+                        Strings.CLIENT.REGISTER_REQUIRED,
+                        Strings.CLIENT.DESCRIPTION_REGISTER_REQUIRED
+                    )
+                }
             }
 
             return Promise.resolve(true)
